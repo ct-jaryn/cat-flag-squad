@@ -23,12 +23,24 @@
   #wrap {
     position: relative;
     box-shadow: 0 0 40px rgba(255, 80, 0, 0.25);
+    user-select: none;
+    -webkit-user-select: none;
+    max-width: 100%;
+    max-height: 100vh;
   }
   canvas {
     display: block;
     background: #000;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    touch-action: none;
+    max-width: 100%;
+    max-height: 100vh;
+  }
+  #overlay {
+    user-select: none;
+    -webkit-user-select: none;
+    overflow-y: auto;
   }
   #hud {
     position: absolute;
@@ -48,7 +60,7 @@
   #hud .stage { color: #5ad7ff; }
 
   #overlay {
-    position: absolute;
+    position: fixed;
     inset: 0;
     background: linear-gradient(160deg, rgba(10,12,28,0.95) 0%, rgba(32,18,46,0.95) 55%, rgba(68,24,24,0.95) 100%);
     display: flex;
@@ -58,6 +70,9 @@
     text-align: center;
     z-index: 5;
     padding: 28px;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow-y: auto;
   }
   #overlay .card {
     background: rgba(255,255,255,0.06);
@@ -84,6 +99,12 @@
     margin-bottom: 2px;
     text-shadow: none;
     filter: drop-shadow(0 2px 10px rgba(255,138,58,0.35));
+  }
+  #overlay h1.end-title {
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: currentColor;
+    background-clip: initial;
   }
   #overlay h2 {
     font-size: 20px;
@@ -184,6 +205,19 @@
     margin-bottom: 6px;
     filter: drop-shadow(0 0 8px rgba(255,206,90,0.4));
   }
+  @media (max-width: 560px) {
+    #overlay { justify-content: flex-start; padding: 16px 0; }
+    #overlay h1 { font-size: 34px; letter-spacing: 2px; }
+    #overlay h2 { font-size: 15px; letter-spacing: 5px; margin-bottom: 12px; }
+    #overlay .card { padding: 22px 20px; }
+    #overlay .panel { padding: 12px 14px; margin-bottom: 12px; }
+    #overlay .keys { gap: 4px 10px; font-size: 11px; }
+    #overlay .tagline { margin-bottom: 12px; }
+    #overlay .diff-btn { padding: 7px 14px; font-size: 12px; }
+    #overlay .btn { padding: 12px 36px; font-size: 17px; }
+    #overlay .hint { margin-top: 12px; }
+    .cat-emoji { font-size: 28px; margin-bottom: 4px; }
+  }
 </style>
 </head>
 <body>
@@ -242,7 +276,7 @@
   const stageEl = document.getElementById('stage');
 
   // ---------- 输入 ----------
-  const keys = {};
+  let keys = {};
   const mouse = { x: 0, y: 0, down: false };
 
   window.addEventListener('keydown', e => {
@@ -258,38 +292,35 @@
   });
   canvas.addEventListener('mousedown', () => { mouse.down = true; });
   window.addEventListener('mouseup', () => { mouse.down = false; });
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
 
   // 触摸控制
   let touchLeft = false, touchRight = false, touchJump = false;
+  function updateTouchState(e) {
+    touchLeft = touchRight = touchJump = false;
+    for (const t of e.touches) {
+      const r = canvas.getBoundingClientRect();
+      const x = (t.clientX - r.left) * (W / r.width);
+      const y = (t.clientY - r.top) * (H / r.height);
+      if (x < W * 0.4 && y > H * 0.5) touchLeft = true;
+      else if (x > W * 0.6 && y > H * 0.5) touchRight = true;
+      else if (y < H * 0.5) touchJump = true;
+    }
+    updateTouchMouse(e);
+  }
   canvas.addEventListener('touchstart', e => {
     e.preventDefault();
     mouse.down = true;
-    for (const t of e.changedTouches) {
-      const r = canvas.getBoundingClientRect();
-      const x = (t.clientX - r.left) * (W / r.width);
-      const y = (t.clientY - r.top) * (H / r.height);
-      if (x < W * 0.4 && y > H * 0.5) touchLeft = true;
-      else if (x > W * 0.6 && y > H * 0.5) touchRight = true;
-      else if (y < H * 0.5) touchJump = true;
-    }
-    updateTouchMouse(e);
+    updateTouchState(e);
   }, { passive: false });
   canvas.addEventListener('touchmove', e => {
     e.preventDefault();
-    touchLeft = touchRight = touchJump = false;
-    for (const t of e.changedTouches) {
-      const r = canvas.getBoundingClientRect();
-      const x = (t.clientX - r.left) * (W / r.width);
-      const y = (t.clientY - r.top) * (H / r.height);
-      if (x < W * 0.4 && y > H * 0.5) touchLeft = true;
-      else if (x > W * 0.6 && y > H * 0.5) touchRight = true;
-      else if (y < H * 0.5) touchJump = true;
-    }
-    updateTouchMouse(e);
+    updateTouchState(e);
   }, { passive: false });
   canvas.addEventListener('touchend', e => {
     e.preventDefault();
-    if (e.touches.length === 0) { mouse.down = false; touchLeft = touchRight = touchJump = false; }
+    updateTouchState(e);
+    if (e.touches.length === 0) mouse.down = false;
   }, { passive: false });
   function updateTouchMouse(e) {
     if (e.touches.length) {
@@ -299,6 +330,14 @@
       mouse.y = (t.clientY - r.top) * (H / r.height);
     }
   }
+
+  // 窗口失焦或鼠标离开窗口时清空输入，防止按键/鼠标卡住
+  window.addEventListener('blur', () => {
+    keys = {};
+    mouse.down = false;
+    touchLeft = touchRight = touchJump = false;
+  });
+  window.addEventListener('mouseleave', () => { mouse.down = false; });
 
   // ---------- 工具 ----------
   const rand = (a, b) => a + Math.random() * (b - a);
@@ -330,14 +369,16 @@
 
   // ---------- 世界 ----------
   const GROUND_Y = H - 70;          // 地面顶
-  const GRAVITY = 2000;
   const WORLD_LEN = 6400;           // 关卡总长
   let camX = 0;
   let stage = 1;
   let score = 0;
+  let highScore = 0;
+  try { highScore = parseInt(localStorage.getItem('catFlagSquadHighScore'), 10) || 0; } catch (e) {}
   let gameOver = false;
   let win = false;
   let shake = 0;
+  let stageTimeout = null;
 
   // 平台数据（关卡设计）
   let platforms = [];
@@ -355,6 +396,8 @@
     platforms = [];
     enemies = [];
     bullets = []; ebullets = []; particles = []; pickups = [];
+    const statMult = enemyStatMult();
+    const fireMult = enemyFireMult();
 
     if (stage === 1) {
       // ===== 第一关：草地堡垒 =====
@@ -391,7 +434,7 @@
         enemies.push(en);
       }
       const boss = makeEnemy(WORLD_LEN - 350, GROUND_Y - 90, 'turret');
-      boss.w = 70; boss.h = 90; boss.hp = 14; boss.maxhp = 14; boss.fireCD = 1.2;
+      boss.w = 70; boss.h = 90; boss.hp = Math.max(1, Math.round(14 * statMult)); boss.maxhp = boss.hp; boss.fireCD = 1.2 * fireMult;
       enemies.push(boss);
 
       pickups = [
@@ -405,55 +448,97 @@
       // ===== 第二关：天空直升机 =====
       // 起始平台
       platforms.push({ x: 0, y: GROUND_Y, w: 600, h: 120, type: 'ground' });
-      // 浮空云岛平台
+      // 浮空云岛平台（间距更近，方便连续跳跃）
       const floats = [
-        [650, GROUND_Y - 130, 160], [900, GROUND_Y - 210, 140],
-        [1200, GROUND_Y - 150, 150], [1550, GROUND_Y - 240, 130],
-        [1900, GROUND_Y - 160, 160], [2300, GROUND_Y - 220, 140],
-        [2700, GROUND_Y - 140, 150], [3100, GROUND_Y - 200, 140],
-        [3500, GROUND_Y - 130, 160], [3950, GROUND_Y - 230, 140],
-        [4400, GROUND_Y - 160, 160], [4900, GROUND_Y - 210, 140],
-        [5400, GROUND_Y - 140, 160], [5900, GROUND_Y - 200, 140],
-        [6300, GROUND_Y - 120, 300],
+        [700, GROUND_Y - 120, 150],
+        [880, GROUND_Y - 120, 150],
+        [1060, GROUND_Y - 180, 120],
+        [1240, GROUND_Y - 120, 150],
+        [1420, GROUND_Y - 120, 150],
+        [1600, GROUND_Y - 180, 120],
+        [1780, GROUND_Y - 120, 150],
+        [1960, GROUND_Y - 120, 150],
+        [2140, GROUND_Y - 180, 120],
+        [2320, GROUND_Y - 120, 150],
+        [2500, GROUND_Y - 120, 150],
+        [2680, GROUND_Y - 180, 120],
+        [2860, GROUND_Y - 120, 150],
+        [3040, GROUND_Y - 120, 150],
+        [3220, GROUND_Y - 180, 120],
+        [3400, GROUND_Y - 120, 150],
+        [3580, GROUND_Y - 120, 150],
+        [3760, GROUND_Y - 180, 120],
+        [3940, GROUND_Y - 120, 150],
+        [4120, GROUND_Y - 120, 150],
+        [4300, GROUND_Y - 180, 120],
+        [4480, GROUND_Y - 120, 150],
+        [4660, GROUND_Y - 120, 150],
+        [4840, GROUND_Y - 180, 120],
+        [5020, GROUND_Y - 120, 150],
+        [5200, GROUND_Y - 120, 150],
+        [5380, GROUND_Y - 180, 120],
+        [5560, GROUND_Y - 120, 150],
+        [5740, GROUND_Y - 120, 150],
+        [5920, GROUND_Y - 180, 120],
+        [6100, GROUND_Y - 120, 200],
       ];
       for (const [x, y, w] of floats) platforms.push({ x, y, w, h: 22, type: 'plat' });
 
-      // 空中狙击手
-      const snipers = [[1100, GROUND_Y - 250], [2100, GROUND_Y - 270], [3400, GROUND_Y - 260], [4700, GROUND_Y - 280], [5900, GROUND_Y - 270]];
-      for (const [x, y] of snipers) {
-        const en = makeEnemy(x, y, 'sniper');
-        enemies.push(en);
-      }
-      // 巡逻飞行兵
-      const flyers = [[1400, GROUND_Y - 100, 1300, 1600], [2600, GROUND_Y - 90, 2500, 2800], [4200, GROUND_Y - 110, 4100, 4400], [5600, GROUND_Y - 100, 5500, 5800]];
-      for (const [x, y, min, max] of flyers) {
-        const en = makeEnemy(x, y, 'patrol');
-        en.patrolMin = min; en.patrolMax = max;
-        en.vx = -60;
+      // 所有敌人必须站在跳板上，不再悬浮
+      const platformEnemies = [
+        // [平台 x, 平台 y, 类型, 巡逻范围(可选)]
+        [880, GROUND_Y - 120, 'patrol', 880, 1030],
+        [1060, GROUND_Y - 180, 'sniper'],
+        [1420, GROUND_Y - 120, 'stand'],
+        [1600, GROUND_Y - 180, 'sniper'],
+        [1960, GROUND_Y - 120, 'patrol', 1960, 2110],
+        [2140, GROUND_Y - 180, 'sniper'],
+        [2500, GROUND_Y - 120, 'stand'],
+        [2680, GROUND_Y - 180, 'sniper'],
+        [3040, GROUND_Y - 120, 'patrol', 3040, 3190],
+        [3220, GROUND_Y - 180, 'sniper'],
+        [3580, GROUND_Y - 120, 'stand'],
+        [3760, GROUND_Y - 180, 'sniper'],
+        [4120, GROUND_Y - 120, 'patrol', 4120, 4270],
+        [4300, GROUND_Y - 180, 'sniper'],
+        [4660, GROUND_Y - 120, 'stand'],
+        [4840, GROUND_Y - 180, 'sniper'],
+        [5200, GROUND_Y - 120, 'patrol', 5200, 5350],
+        [5380, GROUND_Y - 180, 'sniper'],
+        [5740, GROUND_Y - 120, 'stand'],
+        [5920, GROUND_Y - 180, 'sniper'],
+      ];
+      for (const e of platformEnemies) {
+        const [px, py, type, min, max] = e;
+        const y = type === 'sniper' ? py - 38 : py - 40;
+        const en = makeEnemy(px, y, type);
+        if (type === 'patrol') { en.patrolMin = min; en.patrolMax = max; }
         enemies.push(en);
       }
 
       // 直升机 Boss（空中）
       const heli = makeEnemy(WORLD_LEN - 500, 160, 'helicopter');
-      heli.w = 160; heli.h = 90; heli.hp = 30; heli.maxhp = 30; heli.fireCD = 1.0;
+      heli.w = 160; heli.h = 90; heli.hp = Math.max(1, Math.round(30 * statMult)); heli.maxhp = heli.hp; heli.fireCD = 1.0 * fireMult;
       heli.phase = 0; heli.centerX = WORLD_LEN - 500; heli.centerY = 200; heli.radius = 220;
       enemies.push(heli);
 
       pickups = [
-        { x: 1050, y: GROUND_Y - 240, type: 'rapid' },
-        { x: 2350, y: GROUND_Y - 250, type: 'life' },
-        { x: 3550, y: GROUND_Y - 260, type: 'spread' },
-        { x: 5050, y: GROUND_Y - 250, type: 'rapid' },
-        { x: 6150, y: GROUND_Y - 180, type: 'life' },
+        { x: 1060, y: GROUND_Y - 180 - 20, type: 'rapid' },
+        { x: 2320, y: GROUND_Y - 120 - 20, type: 'life' },
+        { x: 3220, y: GROUND_Y - 180 - 20, type: 'spread' },
+        { x: 4840, y: GROUND_Y - 180 - 20, type: 'rapid' },
+        { x: 6100, y: GROUND_Y - 120 - 20, type: 'life' },
       ];
     }
   }
 
   function makeEnemy(x, y, type) {
-    const base = { x, y, w: 30, h: 40, vx: 0, vy: 0, type, dir: -1, fireCD: rand(0.8, 1.8), hp: 1, maxhp: 1, dead: false, onGround: false, anim: 0 };
-    if (type === 'sniper') { base.w = 28; base.h = 38; base.hp = 2; base.maxhp = 2; base.fireCD = rand(1.2, 2.2); }
-    if (type === 'turret') { base.hp = 14; base.maxhp = 14; }
-    if (type === 'patrol') { base.vx = -40; }
+    const statMult = enemyStatMult();
+    const fireMult = enemyFireMult();
+    const base = { x, y, w: 30, h: 40, vx: 0, vy: 0, type, dir: -1, fireCD: rand(0.8, 1.8) * fireMult, hp: 1, maxhp: 1, dead: false, onGround: false, anim: 0 };
+    if (type === 'sniper') { base.w = 28; base.h = 38; base.hp = Math.max(1, Math.round(2 * statMult)); base.maxhp = base.hp; base.fireCD = rand(1.2, 2.2) * fireMult; }
+    if (type === 'turret') { base.hp = Math.max(1, Math.round(14 * statMult)); base.maxhp = base.hp; }
+    if (type === 'patrol') { base.vx = -40 * statMult; }
     return base;
   }
 
@@ -466,8 +551,26 @@
   };
 
   function resetPlayer(full) {
-    player.x = Math.max(80, camX + 120);
-    player.y = GROUND_Y - 44;
+    let targetX = Math.max(80, camX + 120);
+    // 找到重生点下方最高的平台，避免第二关悬空重生直接掉落
+    let py = null;
+    for (const p of platforms) {
+      if (targetX + player.w > p.x && targetX < p.x + p.w) {
+        if (py === null || p.y < py) py = p.y;
+      }
+    }
+    if (py === null) {
+      // 没有平台时回到关卡起点
+      targetX = 80;
+      for (const p of platforms) {
+        if (targetX + player.w > p.x && targetX < p.x + p.w) {
+          if (py === null || p.y < py) py = p.y;
+        }
+      }
+    }
+    if (py === null) py = GROUND_Y;
+    player.x = targetX;
+    player.y = py - player.h;
     player.vx = 0; player.vy = 0;
     player.onGround = true; player.dir = 1;
     player.invuln = 1.6;
@@ -585,6 +688,14 @@
     player.prone = proneKey && player.onGround;
     if (player.prone) player.aim = 'side';
 
+    // 根据姿态调整碰撞框高度，保持脚底位置不变
+    const targetH = player.prone ? 22 : (player.crouch ? 34 : 44);
+    if (targetH !== player.h) {
+      const bottom = player.y + player.h;
+      player.h = targetH;
+      player.y = bottom - player.h;
+    }
+
     let move = 0;
     if (!player.prone) {
       if (left) move -= 1;
@@ -635,6 +746,18 @@
     player.vy += 1700 * dt;
     player.x += player.vx * dt;
     player.y += player.vy * dt;
+
+    // 地面平台侧向碰撞，防止穿墙/从坑底穿进下一段地面
+    const prevX = player.x - player.vx * dt;
+    for (const p of platforms) {
+      if (p.type !== 'ground') continue;
+      if (player.y + player.h <= p.y || player.y >= p.y + p.h) continue;
+      if (prevX + player.w <= p.x && player.x + player.w > p.x) {
+        player.x = p.x - player.w; player.vx = 0;
+      } else if (prevX >= p.x + p.w && player.x < p.x + p.w) {
+        player.x = p.x + p.w; player.vx = 0;
+      }
+    }
 
     // 平台碰撞
     let wasOnGround = player.onGround;
@@ -694,7 +817,7 @@
         e.phase += dt * 0.8;
         e.x = e.centerX + Math.cos(e.phase) * e.radius;
         e.y = e.centerY + Math.sin(e.phase * 1.3) * 60;
-        e.dir = e.vx >= 0 ? 1 : -1;
+        e.dir = (player.x + player.w / 2) < (e.x + e.w / 2) ? -1 : 1;
       }
       // 射击：仅在玩家在镜头内 & 一定距离
       const dxp = (player.x + player.w / 2) - (e.x + e.w / 2);
@@ -728,9 +851,8 @@
               // Boss 被击败
               if (stage === 1 && e.type === 'turret') {
                 // 进入第二关
-                stage = 2;
                 score += 1000;
-                setTimeout(() => startNextStage(), 1500);
+                stageTimeout = setTimeout(() => startNextStage(), 1500);
               } else {
                 win = true;
                 endGame(true);
@@ -743,6 +865,7 @@
             }
             shake = e.type === 'turret' ? 18 : (e.type === 'helicopter' ? 24 : 6);
           } else { shake = 2; }
+          break; // 一颗子弹只命中一个敌人
         }
       }
     }
@@ -806,7 +929,7 @@
   function drawSky() {
     const useSky = stage === 2;
     const bgImg = useSky ? assets.skyBg : assets.bg;
-    if (assetsReady && bgImg.complete) {
+    if (assetsReady && bgImg.complete && bgImg.naturalWidth > 0) {
       // 视差滚动背景：比镜头慢 0.3 倍移动，循环铺砖
       const imgW = bgImg.width;
       const imgH = bgImg.height;
@@ -838,7 +961,8 @@
     // 远山
     ctx.fillStyle = '#2a1530';
     for (let i = 0; i < 6; i++) {
-      const mx = (i * 240 - camX * 0.2) % (W + 240);
+      const period = W + 240;
+      const mx = (((i * 240 - camX * 0.2) % period) + period) % period - 240;
       ctx.beginPath();
       ctx.moveTo(mx, GROUND_Y);
       ctx.lineTo(mx + 120, GROUND_Y - 160);
@@ -847,7 +971,8 @@
     }
     ctx.fillStyle = '#3a1838';
     for (let i = 0; i < 6; i++) {
-      const mx = (i * 200 - camX * 0.35) % (W + 200);
+      const period = W + 200;
+      const mx = (((i * 200 - camX * 0.35) % period) + period) % period - 200;
       ctx.beginPath();
       ctx.moveTo(mx, GROUND_Y);
       ctx.lineTo(mx + 100, GROUND_Y - 110);
@@ -894,7 +1019,7 @@
 
     // 夺旗猫精灵图：9 帧横向排列，等宽裁剪后
     // 0:idle 1:run1 2:run2 3:jump 4:shoot_h 5:shoot_up 6:crouch 7:prone 8:flag
-    if (assetsReady && assets.hero.complete) {
+    if (assetsReady && assets.hero.complete && assets.hero.naturalWidth > 0) {
       const frameCount = 9;
       const fw = assets.hero.width / frameCount;
       const fh = assets.hero.height;
@@ -982,7 +1107,7 @@
     if (e.dir < 0) ctx.scale(-1, 1);
 
     if (e.type === 'turret') {
-      if (assetsReady && assets.boss.complete) {
+      if (assetsReady && assets.boss.complete && assets.boss.naturalWidth > 0) {
         const imgW = e.w * 3.5;
         const imgH = e.h * 2.6;
         ctx.save();
@@ -1013,12 +1138,15 @@
       ctx.fillStyle = Math.floor(e.anim * 4) % 2 ? '#ff2020' : '#600';
       ctx.beginPath(); ctx.arc(0, e.h - 74, 4, 0, Math.PI * 2); ctx.fill();
     } else if (e.type === 'helicopter') {
-      if (assetsReady && assets.heliBoss.complete) {
-        const imgW = e.w * 5;
-        const imgH = e.h * 5.2;
+      const imgW = e.w * 5;
+      const imgH = e.h * 5.2;
+      if (assetsReady && assets.heliBoss.complete && assets.heliBoss.naturalWidth > 0) {
         ctx.save();
         ctx.translate(0, e.h / 2 - imgH / 2);
         if (e.dir < 0) ctx.scale(-1, 1);
+        ctx.imageSmoothingEnabled = false;
+        // 绘制两次以消除素材中可能存在的半透明感
+        ctx.drawImage(assets.heliBoss, -imgW / 2, 0, imgW, imgH);
         ctx.drawImage(assets.heliBoss, -imgW / 2, 0, imgW, imgH);
         ctx.restore();
       } else {
@@ -1037,9 +1165,10 @@
       ctx.strokeStyle = 'rgba(200,200,200,0.6)';
       ctx.lineWidth = 3;
       const blade = Math.sin(e.anim * 25) * 60;
+      const bladeY = (assetsReady && assets.heliBoss.complete && assets.heliBoss.naturalWidth > 0) ? -imgH / 2 + 10 : -30;
       ctx.beginPath();
-      ctx.moveTo(-blade, -imgH / 2 + 10);
-      ctx.lineTo(blade, -imgH / 2 + 10);
+      ctx.moveTo(-blade, bladeY);
+      ctx.lineTo(blade, bladeY);
       ctx.stroke();
     } else {
       const bob = Math.sin(e.anim * 8) * 1;
@@ -1186,25 +1315,50 @@
   // ---------- 结束 ----------
   function endGame(victory) {
     gameOver = true;
+    running = false;
+    if (stageTimeout) { clearTimeout(stageTimeout); stageTimeout = null; }
     win = victory;
+    if (score > highScore) {
+      highScore = score;
+      try { localStorage.setItem('catFlagSquadHighScore', highScore); } catch (e) {}
+    }
     overlay.style.display = 'flex';
     overlay.innerHTML = `
-      <h1 style="color:${victory ? '#5ad7ff' : '#ff4a4a'}">${victory ? 'MISSION CLEAR' : 'GAME OVER'}</h1>
-      <h2>${victory ? '任务完成！' : '英雄已倒下…'}</h2>
-      <div class="final">SCORE: ${score}</div>
-      <p>${victory ? '你成功击败了黑猫军团，天空与大地重归和平！' : '敌军火力凶猛，再试一次吧！'}</p>
-      <button class="btn" id="restartBtn">${victory ? 'PLAY AGAIN' : 'RETRY'}</button>
-      <div class="hint">按按钮重新开始</div>
+      <div class="card">
+        <h1 class="end-title" style="color:${victory ? '#5ad7ff' : '#ff4a4a'}">${victory ? 'MISSION CLEAR' : 'GAME OVER'}</h1>
+        <h2>${victory ? '任务完成！' : '英雄已倒下…'}</h2>
+        <div class="final">SCORE: ${score}</div>
+        <div class="final" style="color:#ffe24a">HIGH SCORE: ${highScore}</div>
+        <p>${victory ? '你成功击败了黑猫军团，天空与大地重归和平！' : '敌军火力凶猛，再试一次吧！'}</p>
+        <div class="panel">
+          <div class="panel-title">难度选择</div>
+          <div class="difficulty">
+            <button class="diff-btn ${difficulty === 'easy' ? 'active' : ''}" data-diff="easy">简单</button>
+            <button class="diff-btn ${difficulty === 'normal' ? 'active' : ''}" data-diff="normal">普通</button>
+            <button class="diff-btn ${difficulty === 'hard' ? 'active' : ''}" data-diff="hard">困难</button>
+          </div>
+        </div>
+        <button class="btn" id="restartBtn">${victory ? 'PLAY AGAIN' : 'RETRY'}</button>
+        <div class="hint">按按钮重新开始</div>
+      </div>
     `;
     document.getElementById('restartBtn').onclick = () => startGame(difficulty);
+    document.querySelectorAll('#overlay .diff-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('#overlay .diff-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        difficulty = btn.dataset.diff;
+      };
+    });
   }
 
   function startNextStage() {
     if (gameOver || win) return;
+    stage = 2;
     camX = 0;
     player.weapon = 'normal'; player.weaponTimer = 0;
-    resetPlayer(true);
     buildLevel();
+    resetPlayer(true);
     updateHUD();
     // 显示关卡过渡提示
     const msg = document.createElement('div');
@@ -1228,6 +1382,13 @@
 
   let difficulty = 'easy';
 
+  function enemyStatMult() {
+    return difficulty === 'easy' ? 0.75 : difficulty === 'hard' ? 1.3 : 1.0;
+  }
+  function enemyFireMult() {
+    return difficulty === 'easy' ? 1.4 : difficulty === 'hard' ? 0.75 : 1.0;
+  }
+
   startBtn.onclick = () => startGame(difficulty);
 
   // 难度选择
@@ -1240,17 +1401,24 @@
   });
 
   function startGame(diff) {
+    if (stageTimeout) { clearTimeout(stageTimeout); stageTimeout = null; }
+    camX = 0; score = 0; stage = 1; shake = 0;
     buildLevel();
-    camX = 0; score = 0; stage = 1;
     player.life = diff === 'easy' ? 7 : diff === 'normal' ? 5 : 3;
     player.weapon = 'normal'; player.weaponTimer = 0;
     resetPlayer(true);
+    // 清空输入状态，防止用空格/回车点击按钮时触发跳跃/射击
+    keys = {};
+    mouse.down = false;
+    touchLeft = touchRight = touchJump = false;
+    player.jumpLock = true;
     gameOver = false; win = false;
     overlay.style.display = 'none';
     updateHUD();
+    const wasRunning = running;
     running = true;
     last = performance.now();
-    requestAnimationFrame(loop);
+    if (!wasRunning) requestAnimationFrame(loop);
   }
 
   // 加载资源，完成后自动刷新首帧并启用开始按钮
