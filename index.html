@@ -6,14 +6,15 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>夺旗猫突击队 - Cat Flag Squad</title>
+<title>喵喵突击队 - Meow Assault Squad</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     height: 100%;
-    background: #0a0a0a;
+    background: #1a1025;
     color: #eee;
-    font-family: 'Courier New', monospace;
+    font-family: 'Fredoka', 'Microsoft YaHei', sans-serif;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -22,7 +23,9 @@
   }
   #wrap {
     position: relative;
-    box-shadow: 0 0 40px rgba(255, 80, 0, 0.25);
+    box-shadow: 0 0 60px rgba(255, 138, 58, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
   }
   canvas {
     display: block;
@@ -50,121 +53,150 @@
   #overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(160deg, rgba(10,12,28,0.95) 0%, rgba(32,18,46,0.95) 55%, rgba(68,24,24,0.95) 100%);
+    background: linear-gradient(135deg, rgba(42,22,66,0.96) 0%, rgba(24,16,48,0.96) 50%, rgba(66,30,30,0.96) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
     z-index: 5;
-    padding: 28px;
+    padding: 24px;
   }
   #overlay .card {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 22px;
-    padding: 34px 42px;
-    box-shadow: 0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
-    max-width: 560px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%);
+    border: 2px solid rgba(255,206,90,0.25);
+    border-radius: 28px;
+    padding: 38px 44px;
+    box-shadow: 0 28px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12), 0 0 40px rgba(255,138,58,0.15);
+    max-width: 580px;
     width: 100%;
-    backdrop-filter: blur(6px);
-    animation: popIn 0.5s ease-out;
+    backdrop-filter: blur(10px);
+    animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   @keyframes popIn {
-    from { opacity: 0; transform: translateY(18px) scale(0.96); }
+    from { opacity: 0; transform: translateY(24px) scale(0.94); }
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
-  #overlay h1 {
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  #overlay .logo-wrap {
+    margin-bottom: 18px;
+  }
+  #overlay .cat-icon {
     font-size: 52px;
-    background: linear-gradient(90deg, #ff8a3a, #ffce5a, #5ad7ff);
+    margin-bottom: 8px;
+    animation: float 2.5s ease-in-out infinite;
+    filter: drop-shadow(0 4px 12px rgba(255,206,90,0.4));
+    display: inline-block;
+  }
+  #overlay h1 {
+    font-size: 46px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #ff9a4a, #ffd75a, #7ad7ff, #ff9a4a);
+    background-size: 300% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: 4px;
-    margin-bottom: 2px;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
     text-shadow: none;
-    filter: drop-shadow(0 2px 10px rgba(255,138,58,0.35));
+    animation: shimmer 4s linear infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
   }
   #overlay h2 {
-    font-size: 20px;
-    color: #ff8a5a;
-    letter-spacing: 8px;
-    margin-bottom: 18px;
-    font-weight: 700;
+    font-size: 22px;
+    color: #ff9a5a;
+    letter-spacing: 10px;
+    margin-bottom: 14px;
+    font-weight: 600;
   }
   #overlay p.tagline {
-    color: #d8d0c8;
+    color: #e8e0d8;
     font-size: 14px;
     line-height: 1.6;
     max-width: 420px;
-    margin: 0 auto 20px;
+    margin: 0 auto 22px;
+    opacity: 0.9;
   }
   #overlay .panel {
-    background: rgba(0,0,0,0.22);
-    border-radius: 14px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 18px;
     padding: 16px 18px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
   }
   #overlay .panel-title {
     color: #ffce5a;
     font-size: 12px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    font-weight: 600;
   }
   #overlay .keys {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 6px 14px;
+    gap: 7px 14px;
     font-size: 12px;
-    color: #e8e0d8;
+    color: #f0e8e0;
     text-align: left;
   }
   #overlay .keys b {
-    color: #5ad7ff;
-    font-weight: 700;
-    letter-spacing: 1px;
+    color: #7ad7ff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: rgba(90,215,255,0.12);
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid rgba(90,215,255,0.2);
   }
   #overlay .difficulty {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: center;
-    margin-bottom: 18px;
+    margin-bottom: 4px;
   }
   #overlay .diff-btn {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.12);
     color: #ddd;
-    padding: 8px 18px;
-    border-radius: 20px;
+    padding: 10px 22px;
+    border-radius: 24px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 13px;
-    transition: all 0.15s;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.18s;
   }
-  #overlay .diff-btn:hover { background: rgba(255,255,255,0.14); }
+  #overlay .diff-btn:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
   #overlay .diff-btn.active {
-    background: #ff5a1f;
-    border-color: #ff5a1f;
-    color: #000;
-    font-weight: bold;
+    background: linear-gradient(180deg, #ff8a3a, #ff5a1f);
+    border-color: #ff7a2f;
+    color: #1a0a05;
+    box-shadow: 0 4px 16px rgba(255,90,31,0.4);
   }
   #overlay .btn {
-    background: linear-gradient(180deg, #ff7a2f, #ff5a1f);
+    background: linear-gradient(180deg, #ff8a3a, #ff5a1f);
     color: #1a0a05;
     border: none;
-    padding: 14px 48px;
+    padding: 16px 56px;
     font-family: inherit;
-    font-size: 20px;
-    font-weight: bold;
-    letter-spacing: 4px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 5px;
     cursor: pointer;
-    border-radius: 30px;
-    box-shadow: 0 6px 0 #9a2a00, 0 12px 28px rgba(255,90,31,0.35);
-    transition: transform 0.08s, box-shadow 0.08s;
+    border-radius: 34px;
+    box-shadow: 0 7px 0 #9a2a00, 0 14px 32px rgba(255,90,31,0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-top: 4px;
   }
-  #overlay .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #9a2a00, 0 16px 34px rgba(255,90,31,0.45); }
-  #overlay .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #9a2a00, 0 6px 16px rgba(255,90,31,0.35); }
+  #overlay .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 0 #9a2a00, 0 20px 40px rgba(255,90,31,0.5); }
+  #overlay .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #9a2a00, 0 6px 18px rgba(255,90,31,0.35); }
   #overlay .btn:disabled {
     background: #555;
     box-shadow: none;
@@ -174,15 +206,10 @@
   }
   #overlay .final { color: #ff4a4a; font-size: 22px; margin: 4px 0 14px; }
   #overlay .hint {
-    color: #888;
+    color: #999;
     font-size: 11px;
     margin-top: 16px;
     letter-spacing: 0.5px;
-  }
-  .cat-emoji {
-    font-size: 34px;
-    margin-bottom: 6px;
-    filter: drop-shadow(0 0 8px rgba(255,206,90,0.4));
   }
 </style>
 </head>
@@ -196,17 +223,19 @@
   </div>
   <div id="overlay">
     <div class="card">
-      <div class="cat-emoji">🐱</div>
-      <h1>CAT FLAG SQUAD</h1>
-      <h2>夺 旗 猫 突 击 队</h2>
-      <p class="tagline">穿越草地堡垒，夺取敌方旗帜，击败黑猫坦克！</p>
+      <div class="logo-wrap">
+        <div class="cat-icon">🐱</div>
+        <h1>喵喵突击队</h1>
+        <h2>MEOW ASSAULT SQUAD</h2>
+      </div>
+      <p class="tagline">穿越草地堡垒与天空云层，击败黑猫坦克与直升机，守护喵星和平！</p>
 
       <div class="panel">
         <div class="panel-title">难度选择</div>
         <div class="difficulty">
-          <button class="diff-btn active" data-diff="easy">简单</button>
-          <button class="diff-btn" data-diff="normal">普通</button>
-          <button class="diff-btn" data-diff="hard">困难</button>
+          <button class="diff-btn active" data-diff="easy">🟢 简单</button>
+          <button class="diff-btn" data-diff="normal">🟡 普通</button>
+          <button class="diff-btn" data-diff="hard">🔴 困难</button>
         </div>
       </div>
 
@@ -218,7 +247,7 @@
           <span><b>W / S</b></span><span>瞄准上方 / 下方</span>
           <span><b>WD / WA / SD / SA</b></span><span>45° 斜射</span>
           <span><b>J / 鼠标点击</b></span><span>射击</span>
-          <span><b>K</b></span><span>卧倒射击</span>
+          <span><b>K</b></span><span>卧倒射击（平台+空格可落下）</span>
         </div>
       </div>
 
@@ -229,7 +258,7 @@
 </div>
 
 <script>
-// ============ 夺旗猫突击队 - 单文件 Canvas 实现 ============
+// ============ 喵喵突击队 - 单文件 Canvas 实现 ============
 (() => {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
@@ -1188,13 +1217,23 @@
     gameOver = true;
     win = victory;
     overlay.style.display = 'flex';
+    const title = victory ? 'MISSION CLEAR' : 'GAME OVER';
+    const color = victory ? '#5ad7ff' : '#ff4a4a';
+    const sub = victory ? '喵喵突击队胜利！' : '英雄已倒下…';
+    const desc = victory
+      ? '你成功击败了黑猫军团，天空与大地重归和平！'
+      : '敌军火力凶猛，再试一次吧！';
     overlay.innerHTML = `
-      <h1 style="color:${victory ? '#5ad7ff' : '#ff4a4a'}">${victory ? 'MISSION CLEAR' : 'GAME OVER'}</h1>
-      <h2>${victory ? '任务完成！' : '英雄已倒下…'}</h2>
-      <div class="final">SCORE: ${score}</div>
-      <p>${victory ? '你成功击败了黑猫军团，天空与大地重归和平！' : '敌军火力凶猛，再试一次吧！'}</p>
-      <button class="btn" id="restartBtn">${victory ? 'PLAY AGAIN' : 'RETRY'}</button>
-      <div class="hint">按按钮重新开始</div>
+      <div class="card">
+        <div class="logo-wrap">
+          <div class="cat-icon">${victory ? '🏆' : '😿'}</div>
+          <h1 style="font-size:42px;background:linear-gradient(90deg,#ff9a4a,#ffd75a,#7ad7ff,#ff9a4a);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite;">${title}</h1>
+        </div>
+        <h2 style="color:${color};margin-bottom:10px;">${sub}</h2>
+        <div class="final" style="font-size:26px;margin:10px 0 18px;">SCORE: ${score}</div>
+        <p class="tagline">${desc}</p>
+        <button class="btn" id="restartBtn">${victory ? 'PLAY AGAIN' : 'RETRY'}</button>
+      </div>
     `;
     document.getElementById('restartBtn').onclick = () => startGame(difficulty);
   }
