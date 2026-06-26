@@ -101,14 +101,8 @@
     50% { transform: translateY(-5px); }
   }
   #overlay .logo-wrap {
-    margin-bottom: clamp(6px, 1.2vw, 12px);
-  }
-  #overlay .cat-icon {
-    font-size: clamp(28px, 4.5vw, 44px);
-    margin-bottom: 4px;
-    animation: float 2.5s ease-in-out infinite;
-    filter: drop-shadow(0 3px 10px rgba(255,206,90,0.4));
-    display: inline-block;
+    margin-top: -10px;
+    margin-bottom: clamp(4px, 1vw, 8px);
   }
   #overlay h1 {
     font-size: clamp(28px, 5.5vw, 46px);
@@ -264,14 +258,8 @@
     50% { transform: translateY(-6px); }
   }
   #overlay .logo-wrap {
-    margin-bottom: clamp(10px, 1.8vw, 18px);
-  }
-  #overlay .cat-icon {
-    font-size: clamp(32px, 5vw, 52px);
-    margin-bottom: 6px;
-    animation: float 2.5s ease-in-out infinite;
-    filter: drop-shadow(0 4px 12px rgba(255,206,90,0.4));
-    display: inline-block;
+    margin-top: -12px;
+    margin-bottom: clamp(4px, 1vw, 8px);
   }
   #overlay h1 {
     font-size: clamp(32px, 6vw, 52px);
@@ -381,17 +369,11 @@
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    50% { transform: translateY(-5px); }
   }
   #overlay .logo-wrap {
-    margin-bottom: 18px;
-  }
-  #overlay .cat-icon {
-    font-size: 52px;
-    margin-bottom: 8px;
-    animation: float 2.5s ease-in-out infinite;
-    filter: drop-shadow(0 4px 12px rgba(255,206,90,0.4));
-    display: inline-block;
+    margin-top: -10px;
+    margin-bottom: clamp(4px, 1vw, 8px);
   }
   #overlay h1 {
     font-size: 46px;
@@ -519,7 +501,7 @@
   }
   @media (max-height: 520px) {
     #overlay .cover-art { display: none; }
-    #overlay .cat-icon { font-size: 26px; display: inline-block !important; }
+    #overlay .logo-wrap { margin-top: 0; }
   }
 </style>
 </head>
@@ -545,7 +527,6 @@
     <div class="card">
       <img class="cover-art" id="coverArt" src="assets/cover.jpg?v=3" alt="喵喵突击队封面">
       <div class="logo-wrap">
-        <div class="cat-icon" id="catIcon">🐱</div>
         <h1>喵喵突击队</h1>
         <h2>守护喵星</h2>
       </div>
@@ -601,13 +582,11 @@
   const scoreEl = document.getElementById('score');
   const stageEl = document.getElementById('stage');
   const coverArt = document.getElementById('coverArt');
-  const catIcon = document.getElementById('catIcon');
   const helpBtn = document.getElementById('helpBtn');
   const helpPanel = document.getElementById('helpPanel');
 
-  // 封面加载失败时隐藏图片并显示图标
-  coverArt.onerror = () => { coverArt.style.display = 'none'; catIcon.style.display = 'inline-block'; };
-  coverArt.onload = () => { catIcon.style.display = 'none'; };
+  // 封面加载失败时隐藏图片
+  coverArt.onerror = () => { coverArt.style.display = 'none'; };
 
   // 操作说明展开/收起
   helpBtn.onclick = () => {
