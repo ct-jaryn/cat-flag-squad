@@ -498,16 +498,30 @@
   @media (max-width: 520px) {
     #overlay .help-panel .keys { grid-template-columns: 1fr; }
     #overlay .help-panel .keys span { display: flex; gap: 8px; align-items: center; }
-    #overlay .diff-btn { padding: 5px 12px; font-size: 11px; border-radius: 16px; }
-    #overlay .btn { padding: 9px 28px; font-size: 15px; border-radius: 22px; letter-spacing: 2px; }
-    #overlay .btn-secondary { padding: 6px 16px; font-size: 12px; margin-bottom: 6px; }
+    #overlay .diff-btn { padding: 4px 8px; font-size: 10px; border-radius: 14px; }
+    #overlay .btn { padding: 7px 18px; font-size: 13px; border-radius: 18px; letter-spacing: 1px; }
+    #overlay .btn-secondary { padding: 5px 12px; font-size: 11px; margin-bottom: 4px; }
+    #overlay .card { padding: 12px 14px; }
   }
   @media (max-height: 520px) {
     #overlay .cover-art { display: none; }
     #overlay .logo-wrap { margin-top: 0; }
-    #overlay .diff-btn { padding: 5px 12px; font-size: 11px; border-radius: 16px; }
-    #overlay .btn { padding: 9px 28px; font-size: 15px; border-radius: 22px; letter-spacing: 2px; }
-    #overlay .btn-secondary { padding: 6px 16px; font-size: 12px; margin-bottom: 6px; }
+    #overlay .diff-btn { padding: 4px 8px; font-size: 10px; border-radius: 14px; }
+    #overlay .btn { padding: 7px 18px; font-size: 13px; border-radius: 18px; letter-spacing: 1px; }
+    #overlay .btn-secondary { padding: 5px 12px; font-size: 11px; margin-bottom: 4px; }
+    #overlay .card { padding: 12px 14px; }
+  }
+  @media (max-width: 380px), (max-height: 420px) {
+    #overlay .diff-btn { padding: 3px 6px; font-size: 9px; border-radius: 12px; }
+    #overlay .btn { padding: 6px 14px; font-size: 11px; border-radius: 16px; letter-spacing: 0; }
+    #overlay .btn-secondary { padding: 4px 10px; font-size: 10px; margin-bottom: 3px; }
+    #overlay .card { padding: 10px 12px; }
+    #overlay .logo-wrap { margin-bottom: 2px; }
+    #overlay h1 { font-size: clamp(22px, 7vw, 30px); }
+    #overlay h2 { font-size: clamp(11px, 3.5vw, 14px); margin-bottom: 6px; }
+    #overlay p.tagline { margin-bottom: 8px; font-size: 11px; }
+    #overlay .panel { padding: 8px 10px; margin-bottom: 8px; }
+    #overlay .panel-title { margin-bottom: 5px; }
   }
 </style>
 </head>
