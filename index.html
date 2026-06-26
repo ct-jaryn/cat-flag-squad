@@ -232,9 +232,9 @@
     color: #ffce5a;
     border: 2px solid rgba(255,206,90,0.3);
     box-shadow: none;
-    padding: clamp(8px, 1.4vw, 11px) clamp(24px, 4vw, 36px);
-    font-size: clamp(13px, 2vw, 15px);
-    margin-bottom: clamp(8px, 1.2vw, 12px);
+    padding: clamp(6px, 1vw, 9px) clamp(16px, 2.8vw, 28px);
+    font-size: clamp(12px, 1.7vw, 14px);
+    margin-bottom: clamp(4px, 0.8vw, 8px);
   }
   #overlay .btn-secondary:hover { background: rgba(255,206,90,0.25); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(255,206,90,0.2); }
   #overlay .card::-webkit-scrollbar {
@@ -245,7 +245,7 @@
     aspect-ratio: 16 / 9;
     border-radius: clamp(10px, 1.5vw, 16px);
     object-fit: cover;
-    margin-bottom: clamp(10px, 2vw, 18px);
+    margin-bottom: clamp(8px, 1.5vw, 14px);
     border: 2px solid rgba(255,206,90,0.25);
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   }
@@ -376,14 +376,14 @@
     margin-bottom: clamp(4px, 1vw, 8px);
   }
   #overlay h1 {
-    font-size: 46px;
+    font-size: clamp(26px, 5vw, 46px);
     font-weight: 700;
     background: linear-gradient(90deg, #ff9a4a, #ffd75a, #7ad7ff, #ff9a4a);
     background-size: 300% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: 2px;
+    letter-spacing: clamp(1px, 0.4vw, 3px);
     margin-bottom: 4px;
     text-shadow: none;
     animation: shimmer 4s linear infinite;
@@ -393,40 +393,40 @@
     100% { background-position: 300% 50%; }
   }
   #overlay h2 {
-    font-size: 22px;
+    font-size: clamp(12px, 2vw, 18px);
     color: #ff9a5a;
-    letter-spacing: 10px;
-    margin-bottom: 14px;
+    letter-spacing: clamp(3px, 0.8vw, 8px);
+    margin-bottom: clamp(6px, 1vw, 12px);
     font-weight: 600;
   }
   #overlay p.tagline {
     color: #e8e0d8;
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: clamp(11px, 1.6vw, 14px);
+    line-height: 1.5;
     max-width: 420px;
-    margin: 0 auto 22px;
+    margin: 0 auto clamp(10px, 1.8vw, 18px);
     opacity: 0.9;
   }
   #overlay .panel {
     background: rgba(0,0,0,0.25);
-    border-radius: 18px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
+    border-radius: clamp(10px, 1.4vw, 16px);
+    padding: clamp(8px, 1.2vw, 12px) clamp(10px, 1.5vw, 14px);
+    margin-bottom: clamp(8px, 1.2vw, 14px);
     border: 1px solid rgba(255,255,255,0.08);
   }
   #overlay .panel-title {
     color: #ffce5a;
-    font-size: 12px;
+    font-size: clamp(10px, 1.2vw, 12px);
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: clamp(5px, 0.8vw, 10px);
     font-weight: 600;
   }
   #overlay .keys {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 7px 14px;
-    font-size: 12px;
+    gap: clamp(3px, 0.6vw, 6px) clamp(6px, 1.2vw, 12px);
+    font-size: clamp(11px, 1.4vw, 13px);
     color: #f0e8e0;
     text-align: left;
   }
@@ -435,25 +435,27 @@
     font-weight: 600;
     letter-spacing: 0.5px;
     background: rgba(90,215,255,0.12);
-    padding: 2px 6px;
-    border-radius: 5px;
+    padding: clamp(1px, 0.3vw, 2px) clamp(3px, 0.5vw, 5px);
+    border-radius: 4px;
     border: 1px solid rgba(90,215,255,0.2);
+    white-space: nowrap;
   }
   #overlay .difficulty {
     display: flex;
-    gap: 12px;
+    gap: clamp(6px, 1vw, 10px);
     justify-content: center;
+    flex-wrap: wrap;
     margin-bottom: 4px;
   }
   #overlay .diff-btn {
     background: rgba(255,255,255,0.06);
     border: 2px solid rgba(255,255,255,0.12);
     color: #ddd;
-    padding: 10px 22px;
-    border-radius: 24px;
+    padding: clamp(5px, 0.9vw, 7px) clamp(10px, 1.6vw, 16px);
+    border-radius: 20px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 14px;
+    font-size: clamp(11px, 1.5vw, 13px);
     font-weight: 600;
     transition: all 0.18s;
   }
@@ -462,20 +464,20 @@
     background: linear-gradient(180deg, #ff8a3a, #ff5a1f);
     border-color: #ff7a2f;
     color: #1a0a05;
-    box-shadow: 0 4px 16px rgba(255,90,31,0.4);
+    box-shadow: 0 3px 12px rgba(255,90,31,0.4);
   }
   #overlay .btn {
     background: linear-gradient(180deg, #ff8a3a, #ff5a1f);
     color: #1a0a05;
     border: none;
-    padding: 16px 56px;
+    padding: clamp(8px, 1.4vw, 11px) clamp(24px, 4vw, 40px);
     font-family: inherit;
-    font-size: 22px;
+    font-size: clamp(14px, 2.2vw, 18px);
     font-weight: 700;
-    letter-spacing: 5px;
+    letter-spacing: clamp(1px, 0.4vw, 3px);
     cursor: pointer;
-    border-radius: 34px;
-    box-shadow: 0 7px 0 #9a2a00, 0 14px 32px rgba(255,90,31,0.4);
+    border-radius: 28px;
+    box-shadow: 0 clamp(3px, 0.6vw, 5px) 0 #9a2a00, 0 clamp(5px, 1vw, 10px) clamp(14px, 2.5vw, 24px) rgba(255,90,31,0.4);
     transition: transform 0.1s, box-shadow 0.1s;
     margin-top: 4px;
   }
@@ -495,33 +497,125 @@
     margin-top: 10px;
     letter-spacing: 0.5px;
   }
-  @media (max-width: 520px) {
-    #overlay .help-panel .keys { grid-template-columns: 1fr; }
-    #overlay .help-panel .keys span { display: flex; gap: 8px; align-items: center; }
-    #overlay .diff-btn { padding: 4px 8px; font-size: 10px; border-radius: 14px; }
-    #overlay .btn { padding: 7px 18px; font-size: 13px; border-radius: 18px; letter-spacing: 1px; }
-    #overlay .btn-secondary { padding: 5px 12px; font-size: 11px; margin-bottom: 4px; }
+
+  /* 暂停菜单 */
+  #pauseOverlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 6;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  #pauseOverlay .pause-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+    border: 2px solid rgba(255,206,90,0.3);
+    border-radius: 24px;
+    padding: 32px 44px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+  }
+  #pauseOverlay .pause-icon {
+    font-size: 46px;
+    margin-bottom: 12px;
+  }
+  #pauseOverlay .pause-title {
+    font-size: 32px;
+    color: #ffce5a;
+    letter-spacing: 4px;
+    margin-bottom: 24px;
+    font-weight: 700;
+  }
+  #pauseOverlay .pause-card .btn { margin-bottom: 10px; }
+
+  @media (max-width: 560px) {
+    #overlay { padding: 14px; }
     #overlay .card { padding: 12px 14px; }
+    #overlay .cover-art { display: none; }
+    #overlay .logo-wrap { margin-top: -6px; margin-bottom: 3px; }
+    #overlay h1 { font-size: clamp(24px, 6vw, 32px); letter-spacing: 1px; }
+    #overlay h2 { font-size: 12px; margin-bottom: 6px; letter-spacing: 2px; }
+    #overlay p.tagline { font-size: 11px; margin-bottom: 10px; }
+    #overlay .panel { padding: 7px 9px; margin-bottom: 7px; }
+    #overlay .panel-compact { padding: 7px 9px; margin-bottom: 7px; }
+    #overlay .panel-title { font-size: 10px; margin-bottom: 4px; }
+    #overlay .difficulty { gap: 6px; }
+    #overlay .diff-btn { padding: 4px 9px; font-size: 10px; border-radius: 14px; }
+    #overlay .btn { padding: 6px 18px; font-size: 12px; border-radius: 16px; letter-spacing: 1px; }
+    #overlay .btn-secondary { padding: 5px 12px; font-size: 11px; margin-bottom: 4px; }
+    #overlay .help-panel { padding: 7px 9px; }
+    #overlay .help-panel .keys { grid-template-columns: 1fr; gap: 3px 6px; font-size: 10px; }
+    #overlay .help-panel .keys span { display: flex; gap: 6px; align-items: center; }
+    #overlay .keys b { font-size: 10px; padding: 1px 3px; }
+    #overlay .hint { font-size: 9px; margin-top: 6px; }
+    #pauseOverlay .pause-card { padding: 18px 24px; border-radius: 16px; }
+    #pauseOverlay .pause-icon { font-size: 32px; margin-bottom: 8px; }
+    #pauseOverlay .pause-title { font-size: 22px; margin-bottom: 12px; letter-spacing: 2px; }
+    #pauseOverlay .pause-card .btn { margin-bottom: 6px; }
+  }
+  @media (max-width: 420px) {
+    #overlay { padding: 8px; }
+    #overlay .card { padding: 7px 9px; max-height: 100%; overflow-y: auto; }
+    #overlay .logo-wrap { margin-top: -4px; margin-bottom: 2px; }
+    #overlay h1 { font-size: clamp(18px, 7vw, 22px); }
+    #overlay h2 { font-size: 10px; margin-bottom: 3px; letter-spacing: 1px; }
+    #overlay p.tagline { font-size: 10px; margin-bottom: 5px; line-height: 1.4; }
+    #overlay .panel { padding: 4px 6px; margin-bottom: 4px; }
+    #overlay .panel-compact { padding: 4px 6px; margin-bottom: 4px; }
+    #overlay .panel-title { font-size: 9px; margin-bottom: 2px; letter-spacing: 1px; }
+    #overlay .difficulty { gap: 4px; }
+    #overlay .diff-btn { padding: 2px 5px; font-size: 9px; border-radius: 10px; }
+    #overlay .btn { padding: 4px 10px; font-size: 10px; border-radius: 12px; letter-spacing: 0; }
+    #overlay .btn-secondary { padding: 3px 7px; font-size: 9px; margin-bottom: 2px; }
+    #overlay .help-panel { padding: 4px 6px; }
+    #overlay .help-panel .keys { font-size: 9px; gap: 2px 4px; }
+    #overlay .keys b { font-size: 9px; padding: 1px 2px; }
+    #overlay .hint { font-size: 8px; margin-top: 3px; }
+    #pauseOverlay .pause-card { padding: 12px 16px; border-radius: 12px; }
+    #pauseOverlay .pause-icon { font-size: 24px; margin-bottom: 6px; }
+    #pauseOverlay .pause-title { font-size: 16px; margin-bottom: 8px; letter-spacing: 1px; }
+    #pauseOverlay .pause-card .btn { margin-bottom: 4px; }
   }
   @media (max-height: 520px) {
-    #overlay .cover-art { display: none; }
-    #overlay .logo-wrap { margin-top: 0; }
-    #overlay .diff-btn { padding: 4px 8px; font-size: 10px; border-radius: 14px; }
-    #overlay .btn { padding: 7px 18px; font-size: 13px; border-radius: 18px; letter-spacing: 1px; }
-    #overlay .btn-secondary { padding: 5px 12px; font-size: 11px; margin-bottom: 4px; }
-    #overlay .card { padding: 12px 14px; }
-  }
-  @media (max-width: 380px), (max-height: 420px) {
-    #overlay .diff-btn { padding: 3px 6px; font-size: 9px; border-radius: 12px; }
-    #overlay .btn { padding: 6px 14px; font-size: 11px; border-radius: 16px; letter-spacing: 0; }
-    #overlay .btn-secondary { padding: 4px 10px; font-size: 10px; margin-bottom: 3px; }
+    #overlay { padding: 10px; }
     #overlay .card { padding: 10px 12px; }
-    #overlay .logo-wrap { margin-bottom: 2px; }
-    #overlay h1 { font-size: clamp(22px, 7vw, 30px); }
-    #overlay h2 { font-size: clamp(11px, 3.5vw, 14px); margin-bottom: 6px; }
-    #overlay p.tagline { margin-bottom: 8px; font-size: 11px; }
-    #overlay .panel { padding: 8px 10px; margin-bottom: 8px; }
-    #overlay .panel-title { margin-bottom: 5px; }
+    #overlay .cover-art { display: none; }
+    #overlay .logo-wrap { margin-top: 0; margin-bottom: 2px; }
+    #overlay h1 { font-size: clamp(22px, 5vh, 30px); }
+    #overlay h2 { font-size: 11px; margin-bottom: 4px; }
+    #overlay p.tagline { font-size: 10px; margin-bottom: 6px; }
+    #overlay .panel { padding: 6px 8px; margin-bottom: 6px; }
+    #overlay .panel-compact { padding: 6px 8px; margin-bottom: 6px; }
+    #overlay .panel-title { font-size: 9px; margin-bottom: 3px; }
+    #overlay .diff-btn { padding: 3px 7px; font-size: 9px; border-radius: 12px; }
+    #overlay .btn { padding: 5px 14px; font-size: 11px; border-radius: 14px; letter-spacing: 0; }
+    #overlay .btn-secondary { padding: 4px 9px; font-size: 10px; margin-bottom: 3px; }
+    #overlay .help-panel .keys { font-size: 9px; }
+    #pauseOverlay .pause-card { padding: 14px 20px; border-radius: 14px; }
+    #pauseOverlay .pause-icon { font-size: 28px; margin-bottom: 6px; }
+    #pauseOverlay .pause-title { font-size: 20px; margin-bottom: 10px; letter-spacing: 2px; }
+    #pauseOverlay .pause-card .btn { margin-bottom: 5px; }
+  }
+  @media (max-height: 360px) {
+    #overlay { padding: 6px; }
+    #overlay .card { padding: 6px 8px; }
+    #overlay .logo-wrap { margin-bottom: 1px; }
+    #overlay h1 { font-size: 18px; }
+    #overlay h2 { font-size: 9px; margin-bottom: 2px; letter-spacing: 1px; }
+    #overlay p.tagline { font-size: 9px; margin-bottom: 4px; }
+    #overlay .panel { padding: 3px 5px; margin-bottom: 3px; }
+    #overlay .panel-compact { padding: 3px 5px; margin-bottom: 3px; }
+    #overlay .diff-btn { padding: 2px 4px; font-size: 8px; border-radius: 8px; }
+    #overlay .btn { padding: 3px 8px; font-size: 9px; border-radius: 10px; }
+    #overlay .btn-secondary { padding: 2px 6px; font-size: 8px; margin-bottom: 2px; }
+    #overlay .help-panel .keys { font-size: 8px; gap: 1px 3px; }
+    #overlay .hint { font-size: 7px; margin-top: 2px; }
+    #pauseOverlay .pause-card { padding: 10px 14px; border-radius: 10px; }
+    #pauseOverlay .pause-icon { font-size: 20px; margin-bottom: 4px; }
+    #pauseOverlay .pause-title { font-size: 14px; margin-bottom: 6px; }
   }
 </style>
 </head>
@@ -580,11 +674,11 @@
 </div>
 
 <!-- 暂停遮罩 -->
-<div id="pauseOverlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.7);z-index:6;align-items:center;justify-content:center;flex-direction:column;text-align:center;">
-  <div style="background:linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06));border:2px solid rgba(255,206,90,0.3);border-radius:24px;padding:32px 44px;box-shadow:0 24px 70px rgba(0,0,0,0.6);backdrop-filter:blur(10px);">
-    <div style="font-size:46px;margin-bottom:12px;">⏸️</div>
-    <h2 style="font-size:32px;color:#ffce5a;letter-spacing:4px;margin-bottom:24px;">游戏暂停</h2>
-    <button class="btn" id="resumeBtn" style="margin-bottom:12px;">继续游戏</button>
+<div id="pauseOverlay">
+  <div class="pause-card">
+    <div class="pause-icon">⏸️</div>
+    <h2 class="pause-title">游戏暂停</h2>
+    <button class="btn" id="resumeBtn">继续游戏</button>
     <button class="btn btn-secondary" id="pauseRestartBtn">重新开始</button>
   </div>
 </div>
