@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>喵喵突击队 - Meow Assault Squad</title>
+<title>喵喵突击队</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -365,9 +365,9 @@
 <div id="wrap">
   <canvas id="game" width="960" height="540"></canvas>
   <div id="hud">
-    <div><span class="life">LIFE</span> <span id="life">3</span></div>
-    <div><span class="stage">STAGE</span> <span id="stage">1</span></div>
-    <div><span class="score">SCORE</span> <span id="score">0</span></div>
+    <div><span class="life">生命</span> <span id="life">3</span></div>
+    <div><span class="stage">关卡</span> <span id="stage">1</span></div>
+    <div><span class="score">得分</span> <span id="score">0</span></div>
   </div>
   <div id="overlay">
     <div class="card">
@@ -375,7 +375,7 @@
       <div class="logo-wrap">
         <div class="cat-icon" id="catIcon">🐱</div>
         <h1>喵喵突击队</h1>
-        <h2>MEOW ASSAULT SQUAD</h2>
+        <h2>喵喵突击队</h2>
       </div>
       <p class="tagline">穿越草地堡垒与天空云层，击败黑猫坦克与直升机，守护喵星和平！</p>
 
@@ -400,7 +400,7 @@
         </div>
       </div>
 
-      <button class="btn" id="startBtn">START</button>
+      <button class="btn" id="startBtn">开始游戏</button>
       <div class="hint">移动端：屏幕左右两侧触控移动 / 跳跃，点击屏幕射击</div>
     </div>
   </div>
@@ -1374,7 +1374,7 @@
     gameOver = true;
     win = victory;
     overlay.style.display = 'flex';
-    const title = victory ? 'MISSION CLEAR' : 'GAME OVER';
+    const title = victory ? '任务完成' : '游戏结束';
     const color = victory ? '#5ad7ff' : '#ff4a4a';
     const sub = victory ? '喵喵突击队胜利！' : '英雄已倒下…';
     const desc = victory
@@ -1387,9 +1387,9 @@
           <h1 style="font-size:42px;background:linear-gradient(90deg,#ff9a4a,#ffd75a,#7ad7ff,#ff9a4a);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite;">${title}</h1>
         </div>
         <h2 style="color:${color};margin-bottom:10px;">${sub}</h2>
-        <div class="final" style="font-size:26px;margin:10px 0 18px;">SCORE: ${score}</div>
+        <div class="final" style="font-size:26px;margin:10px 0 18px;">得分: ${score}</div>
         <p class="tagline">${desc}</p>
-        <button class="btn" id="restartBtn">${victory ? 'PLAY AGAIN' : 'RETRY'}</button>
+        <button class="btn" id="restartBtn">${victory ? '再玩一次' : '重新挑战'}</button>
       </div>
     `;
     document.getElementById('restartBtn').onclick = () => startGame(difficulty);
@@ -1404,7 +1404,7 @@
     updateHUD();
     // 显示关卡过渡提示
     const msg = document.createElement('div');
-    msg.textContent = 'STAGE 2 - 天空直升机';
+    msg.textContent = '第二关 - 天空直升机';
     msg.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;color:#5ad7ff;letter-spacing:4px;text-shadow:0 0 10px #000;pointer-events:none;z-index:10;';
     document.getElementById('wrap').appendChild(msg);
     setTimeout(() => msg.remove(), 2000);
@@ -1453,7 +1453,7 @@
   startBtn.textContent = 'LOADING...';
   startBtn.disabled = true;
   loadAssets(() => {
-    startBtn.textContent = 'START';
+    startBtn.textContent = '开始游戏';
     startBtn.disabled = false;
     buildLevel();
     render();
