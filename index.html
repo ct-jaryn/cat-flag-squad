@@ -159,7 +159,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.92);
     z-index: 29;
     animation: fadeIn 0.2s ease-out;
   }
@@ -174,7 +174,7 @@
     width: 100%;
     max-height: min(80vh, 520px);
     overflow-y: auto;
-    background: linear-gradient(180deg, rgba(40,25,55,0.98), rgba(24,16,40,0.98));
+    background: #241830;
     border: 2px solid rgba(255,206,90,0.35);
     border-radius: clamp(14px, 2vw, 22px);
     padding: clamp(16px, 2.2vw, 22px);
@@ -215,7 +215,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.65);
+    background: rgba(0,0,0,0.8);
     z-index: 29;
     animation: fadeIn 0.2s ease-out;
   }
@@ -685,7 +685,21 @@
 <body>
 <div id="wrap">
   <!-- 加载界面 -->
-  <div id="loadingOverlay" style="position:absolute;inset:0;background:linear-gradient(135deg,#2a1642 0%,#181030 50%,#421e1e 100%);z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+  #loadingOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #2a1642 0%, #181030 50%, #421e1e 100%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+  }
+  #loadingOverlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
     <div style="animation:float 2.5s ease-in-out infinite;font-size:clamp(40px,8vw,72px);margin-bottom:12px;">🐱</div>
     <h1 style="font-size:clamp(28px,6vw,46px);font-weight:700;background:linear-gradient(90deg,#ff9a4a,#ffd75a,#7ad7ff,#ff9a4a);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite;letter-spacing:2px;margin-bottom:8px;">喵喵突击队</h1>
     <div style="width:min(70%,320px);height:10px;background:rgba(255,255,255,0.12);border-radius:5px;overflow:hidden;margin:18px 0 10px;box-shadow:0 0 20px rgba(255,138,58,0.2);">
@@ -1846,7 +1860,7 @@
       loadingText.textContent = '加载中 ' + pct + '%';
     },
     () => {
-      loadingOverlay.style.display = 'none';
+      loadingOverlay.classList.add('hide');
       startBtn.textContent = '开始游戏';
       startBtn.disabled = false;
       buildLevel();
