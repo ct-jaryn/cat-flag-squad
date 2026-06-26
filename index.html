@@ -157,14 +157,61 @@
   }
   #overlay .help-panel {
     display: none;
-    background: rgba(0,0,0,0.3);
-    border-radius: clamp(10px, 1.4vw, 16px);
-    padding: clamp(10px, 1.5vw, 14px) clamp(12px, 1.8vw, 16px);
-    margin-bottom: clamp(10px, 1.5vw, 14px);
-    border: 1px solid rgba(255,255,255,0.1);
-    animation: fadeIn 0.25s ease-out;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    max-width: min(92vw, 420px);
+    width: 100%;
+    max-height: min(80vh, 520px);
+    overflow-y: auto;
+    background: linear-gradient(180deg, rgba(40,25,55,0.98), rgba(24,16,40,0.98));
+    border: 2px solid rgba(255,206,90,0.35);
+    border-radius: clamp(14px, 2vw, 22px);
+    padding: clamp(16px, 2.2vw, 22px);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.7), 0 0 30px rgba(255,138,58,0.25);
+    backdrop-filter: blur(16px);
+    z-index: 30;
+    animation: popIn 0.25s ease-out forwards;
   }
   #overlay .help-panel.show { display: block; }
+  #overlay .help-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: clamp(10px, 1.5vw, 14px);
+  }
+  #overlay .help-header h3 {
+    color: #ffce5a;
+    font-size: clamp(15px, 2.2vw, 18px);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0;
+  }
+  #overlay .help-close {
+    background: rgba(255,255,255,0.1);
+    color: #ffce5a;
+    border: 1px solid rgba(255,206,90,0.25);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.18s;
+  }
+  #overlay .help-close:hover { background: rgba(255,90,31,0.3); color: #fff; transform: rotate(90deg); }
+  #overlay .help-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 29;
+    animation: fadeIn 0.2s ease-out;
+  }
+  #overlay .help-backdrop.show { display: block; }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-6px); }
     to { opacity: 1; transform: translateY(0); }
@@ -546,7 +593,9 @@
     #overlay .diff-btn { padding: 4px 9px; font-size: 10px; border-radius: 14px; }
     #overlay .btn { padding: 6px 18px; font-size: 12px; border-radius: 16px; letter-spacing: 1px; }
     #overlay .btn-secondary { padding: 5px 12px; font-size: 11px; margin-bottom: 4px; }
-    #overlay .help-panel { padding: 7px 9px; }
+    #overlay .help-panel { padding: 12px 14px; max-width: 96vw; max-height: 82vh; }
+    #overlay .help-header h3 { font-size: 13px; }
+    #overlay .help-close { width: 24px; height: 24px; font-size: 12px; }
     #overlay .help-panel .keys { grid-template-columns: 1fr; gap: 3px 6px; font-size: 10px; }
     #overlay .help-panel .keys span { display: flex; gap: 6px; align-items: center; }
     #overlay .keys b { font-size: 10px; padding: 1px 3px; }
@@ -570,7 +619,9 @@
     #overlay .diff-btn { padding: 2px 5px; font-size: 9px; border-radius: 10px; }
     #overlay .btn { padding: 4px 10px; font-size: 10px; border-radius: 12px; letter-spacing: 0; }
     #overlay .btn-secondary { padding: 3px 7px; font-size: 9px; margin-bottom: 2px; }
-    #overlay .help-panel { padding: 4px 6px; }
+    #overlay .help-panel { padding: 8px 10px; }
+    #overlay .help-header h3 { font-size: 12px; }
+    #overlay .help-close { width: 22px; height: 22px; }
     #overlay .help-panel .keys { font-size: 9px; gap: 2px 4px; }
     #overlay .keys b { font-size: 9px; padding: 1px 2px; }
     #overlay .hint { font-size: 8px; margin-top: 3px; }
@@ -593,6 +644,8 @@
     #overlay .diff-btn { padding: 3px 7px; font-size: 9px; border-radius: 12px; }
     #overlay .btn { padding: 5px 14px; font-size: 11px; border-radius: 14px; letter-spacing: 0; }
     #overlay .btn-secondary { padding: 4px 9px; font-size: 10px; margin-bottom: 3px; }
+    #overlay .help-panel { padding: 10px 12px; max-width: 92vw; max-height: 85vh; }
+    #overlay .help-header h3 { font-size: 13px; }
     #overlay .help-panel .keys { font-size: 9px; }
     #pauseOverlay .pause-card { padding: 14px 20px; border-radius: 14px; }
     #pauseOverlay .pause-icon { font-size: 28px; margin-bottom: 6px; }
@@ -611,6 +664,8 @@
     #overlay .diff-btn { padding: 2px 4px; font-size: 8px; border-radius: 8px; }
     #overlay .btn { padding: 3px 8px; font-size: 9px; border-radius: 10px; }
     #overlay .btn-secondary { padding: 2px 6px; font-size: 8px; margin-bottom: 2px; }
+    #overlay .help-panel { padding: 6px 8px; }
+    #overlay .help-header h3 { font-size: 11px; }
     #overlay .help-panel .keys { font-size: 8px; gap: 1px 3px; }
     #overlay .hint { font-size: 7px; margin-top: 2px; }
     #pauseOverlay .pause-card { padding: 10px 14px; border-radius: 10px; }
@@ -656,7 +711,12 @@
       </div>
 
       <button class="btn btn-secondary" id="helpBtn">📖 操作说明</button>
+      <div class="help-backdrop" id="helpBackdrop"></div>
       <div class="help-panel" id="helpPanel">
+        <div class="help-header">
+          <h3>🎮 操作说明</h3>
+          <button class="help-close" id="helpClose" aria-label="关闭">✕</button>
+        </div>
         <div class="keys">
           <span><b>A / D</b> 或 <b>← / →</b></span><span>左右移动 / 组合瞄准</span>
           <span><b>空格</b></span><span>跳跃（空中可二段跳）</span>
@@ -698,15 +758,21 @@
   const coverArt = document.getElementById('coverArt');
   const helpBtn = document.getElementById('helpBtn');
   const helpPanel = document.getElementById('helpPanel');
+  const helpBackdrop = document.getElementById('helpBackdrop');
+  const helpClose = document.getElementById('helpClose');
 
   // 封面加载失败时隐藏图片
   coverArt.onerror = () => { coverArt.style.display = 'none'; };
 
-  // 操作说明展开/收起
-  helpBtn.onclick = () => {
-    const showing = helpPanel.classList.toggle('show');
-    helpBtn.textContent = showing ? '📖 收起说明' : '📖 操作说明';
-  };
+  // 操作说明弹窗控制
+  function showHelp(show) {
+    helpPanel.classList.toggle('show', show);
+    helpBackdrop.classList.toggle('show', show);
+    helpBtn.textContent = show ? '📖 收起说明' : '📖 操作说明';
+  }
+  helpBtn.onclick = () => showHelp(!helpPanel.classList.contains('show'));
+  helpClose.onclick = () => showHelp(false);
+  helpBackdrop.onclick = () => showHelp(false);
 
   // ---------- 输入 ----------
   const keys = {};
