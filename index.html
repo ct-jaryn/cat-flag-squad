@@ -568,6 +568,16 @@
   </div>
 </div>
 
+<!-- 暂停遮罩 -->
+<div id="pauseOverlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.7);z-index:6;align-items:center;justify-content:center;flex-direction:column;text-align:center;">
+  <div style="background:linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06));border:2px solid rgba(255,206,90,0.3);border-radius:24px;padding:32px 44px;box-shadow:0 24px 70px rgba(0,0,0,0.6);backdrop-filter:blur(10px);">
+    <div style="font-size:46px;margin-bottom:12px;">⏸️</div>
+    <h2 style="font-size:32px;color:#ffce5a;letter-spacing:4px;margin-bottom:24px;">游戏暂停</h2>
+    <button class="btn" id="resumeBtn" style="margin-bottom:12px;">继续游戏</button>
+    <button class="btn btn-secondary" id="pauseRestartBtn">重新开始</button>
+  </div>
+</div>
+
 <script>
 // ============ 喵喵突击队 - 单文件 Canvas 实现 ============
 (() => {
@@ -602,6 +612,9 @@
   window.addEventListener('keydown', e => {
     keys[e.key.toLowerCase()] = true;
     if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+    if ((e.key === 'Escape' || e.key.toLowerCase() === 'p') && running && !gameOver && !win) {
+      togglePause();
+    }
   });
   window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
@@ -1583,13 +1596,27 @@
   // ---------- 主循环 ----------
   let last = 0;
   let running = false;
+  let paused = false;
+  let rafId = null;
   function loop(t) {
     if (!running) return;
+    rafId = requestAnimationFrame(loop);
+    if (paused) return;
     const dt = Math.min(0.033, (t - last) / 1000 || 0.016);
     last = t;
     update(dt);
     render();
-    requestAnimationFrame(loop);
+  }
+
+  function togglePause() {
+    paused = !paused;
+    const pauseOverlay = document.getElementById('pauseOverlay');
+    if (paused) {
+      pauseOverlay.style.display = 'flex';
+    } else {
+      pauseOverlay.style.display = 'none';
+      last = performance.now();
+    }
   }
 
   let difficulty = 'easy';
@@ -1605,7 +1632,15 @@
     };
   });
 
+  // 暂停菜单按钮
+  document.getElementById('resumeBtn').onclick = () => togglePause();
+  document.getElementById('pauseRestartBtn').onclick = () => startGame(difficulty);
+
   function startGame(diff) {
+    if (rafId) cancelAnimationFrame(rafId);
+    running = false;
+    paused = false;
+    document.getElementById('pauseOverlay').style.display = 'none';
     buildLevel();
     camX = 0; score = 0; stage = 1;
     player.life = diff === 'easy' ? 7 : diff === 'normal' ? 5 : 3;
@@ -1616,7 +1651,7 @@
     updateHUD();
     running = true;
     last = performance.now();
-    requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(loop);
   }
 
   // 加载资源，完成后自动刷新首帧并启用开始按钮
