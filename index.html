@@ -155,6 +155,15 @@
     margin-bottom: clamp(6px, 1vw, 10px);
     font-weight: 600;
   }
+  #overlay .help-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 29;
+    animation: fadeIn 0.2s ease-out;
+  }
+  #overlay .help-backdrop.show { display: block; }
   #overlay .help-panel {
     display: none;
     position: fixed;
@@ -170,7 +179,6 @@
     border-radius: clamp(14px, 2vw, 22px);
     padding: clamp(16px, 2.2vw, 22px);
     box-shadow: 0 24px 70px rgba(0,0,0,0.7), 0 0 30px rgba(255,138,58,0.25);
-    backdrop-filter: blur(16px);
     z-index: 30;
     animation: popIn 0.25s ease-out forwards;
   }
