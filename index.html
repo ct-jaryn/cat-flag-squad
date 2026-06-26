@@ -525,6 +525,16 @@
 </head>
 <body>
 <div id="wrap">
+  <!-- 加载界面 -->
+  <div id="loadingOverlay" style="position:absolute;inset:0;background:linear-gradient(135deg,#2a1642 0%,#181030 50%,#421e1e 100%);z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+    <div style="animation:float 2.5s ease-in-out infinite;font-size:clamp(40px,8vw,72px);margin-bottom:12px;">🐱</div>
+    <h1 style="font-size:clamp(28px,6vw,46px);font-weight:700;background:linear-gradient(90deg,#ff9a4a,#ffd75a,#7ad7ff,#ff9a4a);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite;letter-spacing:2px;margin-bottom:8px;">喵喵突击队</h1>
+    <div style="width:min(70%,320px);height:10px;background:rgba(255,255,255,0.12);border-radius:5px;overflow:hidden;margin:18px 0 10px;box-shadow:0 0 20px rgba(255,138,58,0.2);">
+      <div id="loadingBar" style="width:0%;height:100%;background:linear-gradient(90deg,#ff8a3a,#ffce5a);transition:width 0.2s ease-out;"></div>
+    </div>
+    <div id="loadingText" style="color:#ffce5a;font-size:clamp(14px,2.4vw,18px);font-weight:600;letter-spacing:2px;">加载中 0%</div>
+    <div style="color:#999;font-size:clamp(10px,1.6vw,12px);margin-top:12px;">首次加载可能需要几秒，请稍候</div>
+  </div>
   <canvas id="game" width="960" height="540"></canvas>
   <div id="hud">
     <div><span class="life">生命</span> <span id="life">3</span></div>
@@ -533,7 +543,7 @@
   </div>
   <div id="overlay">
     <div class="card">
-      <img class="cover-art" id="coverArt" src="assets/cover.png?v=1" alt="喵喵突击队封面">
+      <img class="cover-art" id="coverArt" src="assets/cover.jpg?v=3" alt="喵喵突击队封面">
       <div class="logo-wrap">
         <div class="cat-icon" id="catIcon">🐱</div>
         <h1>喵喵突击队</h1>
@@ -682,19 +692,20 @@
     cover: new Image(),
   };
   let assetsReady = false;
-  function loadAssets(cb) {
+  function loadAssets(onProgress, cb) {
     let loaded = 0;
     const total = 6;
     const onLoad = () => {
       loaded++;
+      if (onProgress) onProgress(loaded / total);
       if (loaded === total) { assetsReady = true; if (cb) cb(); }
     };
-    assets.bg.src = 'assets/cat_bg.png?v=2'; assets.bg.onload = onLoad; assets.bg.onerror = onLoad;
+    assets.bg.src = 'assets/cat_bg.jpg?v=3'; assets.bg.onload = onLoad; assets.bg.onerror = onLoad;
     assets.hero.src = 'assets/cat_hero_sheet.png?v=2'; assets.hero.onload = onLoad; assets.hero.onerror = onLoad;
     assets.boss.src = 'assets/cat_boss.png?v=2'; assets.boss.onload = onLoad; assets.boss.onerror = onLoad;
-    assets.skyBg.src = 'assets/sky_bg.png?v=1'; assets.skyBg.onload = onLoad; assets.skyBg.onerror = onLoad;
+    assets.skyBg.src = 'assets/sky_bg.jpg?v=3'; assets.skyBg.onload = onLoad; assets.skyBg.onerror = onLoad;
     assets.heliBoss.src = 'assets/heli_boss.png?v=1'; assets.heliBoss.onload = onLoad; assets.heliBoss.onerror = onLoad;
-    assets.cover.src = 'assets/cover.png?v=1'; assets.cover.onload = onLoad; assets.cover.onerror = onLoad;
+    assets.cover.src = 'assets/cover.jpg?v=3'; assets.cover.onload = onLoad; assets.cover.onerror = onLoad;
   }
 
   // ---------- 世界 ----------
@@ -1654,15 +1665,27 @@
     rafId = requestAnimationFrame(loop);
   }
 
-  // 加载资源，完成后自动刷新首帧并启用开始按钮
-  startBtn.textContent = 'LOADING...';
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  const loadingBar = document.getElementById('loadingBar');
+  const loadingText = document.getElementById('loadingText');
+
+  // 加载资源，完成后显示开始界面
+  startBtn.textContent = '加载中...';
   startBtn.disabled = true;
-  loadAssets(() => {
-    startBtn.textContent = '开始游戏';
-    startBtn.disabled = false;
-    buildLevel();
-    render();
-  });
+  loadAssets(
+    (progress) => {
+      const pct = Math.floor(progress * 100);
+      loadingBar.style.width = pct + '%';
+      loadingText.textContent = '加载中 ' + pct + '%';
+    },
+    () => {
+      loadingOverlay.style.display = 'none';
+      startBtn.textContent = '开始游戏';
+      startBtn.disabled = false;
+      buildLevel();
+      render();
+    }
+  );
 
   // 初始渲染一帧背景（资源未加载完成时的占位）
   buildLevel(); render();
