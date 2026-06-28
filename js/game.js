@@ -582,6 +582,7 @@
     vx: 0, vy: 0, onGround: true, dir: 1,
     life: CONFIG.player.life.normal, fireCD: 0, weapon: 'normal', weaponTimer: 0,
     invuln: 0, crouch: false, prone: false, anim: 0, dead: false, respawn: 0, aim: 'side', jumpsLeft: CONFIG.physics.maxJumps,
+    maxLife: CONFIG.player.life.normal,
   };
 
   function resetPlayer(full) {
@@ -686,6 +687,7 @@
       if (player.respawn <= 0) {
         if (player.life <= 0) { endGame(false); return; }
         player.dead = false;
+        world.bullets = []; world.enemyBullets = [];
         resetPlayer(true);
       }
       return;
@@ -958,7 +960,7 @@
         p.taken = true;
         if (p.type === 'rapid') { player.weapon = 'rapid'; player.weaponTimer = CONFIG.weapons.duration; }
         else if (p.type === 'spread') { player.weapon = 'spread'; player.weaponTimer = CONFIG.weapons.duration; }
-        else if (p.type === 'life') { player.life = Math.min(CONFIG.player.maxLife, player.life + 1); }
+        else if (p.type === 'life') { player.life = Math.min(player.maxLife, player.life + 1); }
         audio.play('pickup');
         gameState.score += CONFIG.pickup.score;
         for (let i = 0; i < CONFIG.particles.pickup; i++) world.particles.push({ x: p.x + 10, y: p.y + 10, vx: rand(-100, 100), vy: rand(-120, 20), life: 0.5, c: p.type === 'life' ? CONFIG.colors.particlePickupLife : CONFIG.colors.particlePickupWeapon });
@@ -1502,6 +1504,7 @@
     gameState.camX = 0; gameState.score = 0; gameState.stage = 1; gameState.shake = 0; gameState.totalTime = 0;
     buildLevel();
     player.life = CONFIG.player.life[diff] || CONFIG.player.life.normal;
+    player.maxLife = player.life;
     player.weapon = 'normal'; player.weaponTimer = 0;
     resetPlayer(true);
     // 清空输入状态，防止用空格/回车点击按钮时触发跳跃/射击
