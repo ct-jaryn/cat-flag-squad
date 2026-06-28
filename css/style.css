@@ -1,0 +1,481 @@
+:root {
+  --z-base: 1;
+  --z-game: 2;
+  --z-hud: 5;
+  --z-pause: 6;
+  --z-loading: 20;
+  --z-help-backdrop: 29;
+  --z-help-panel: 30;
+}
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    min-height: 100vh;
+    background: #1a1025;
+    color: #eee;
+    font-family: 'Fredoka', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #wrap {
+    position: relative;
+    width: min(100vw, 177.78vh);
+    height: min(56.25vw, 100vh);
+    max-width: 100vw;
+    max-height: 100vh;
+    box-shadow: 0 0 60px rgba(255, 138, 58, 0.3);
+    border-radius: clamp(0px, 1.2vw, 12px);
+    overflow: hidden;
+    background: #000;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    touch-action: none;
+    max-width: 100%;
+    max-height: 100vh;
+  }
+  #hud {
+    position: absolute;
+    top: 1.5%;
+    left: 0;
+    right: 0;
+    padding: 0 clamp(8px, 1.5vw, 16px);
+    display: flex;
+    justify-content: space-between;
+    font-size: clamp(12px, 2vw, 18px);
+    letter-spacing: 1px;
+    pointer-events: none;
+    text-shadow: 0 0 4px #000, 2px 2px 0 #000;
+  }
+  #hud .life { color: #ff4a4a; }
+  #hud .score { color: #ffe24a; }
+  #hud .stage { color: #5ad7ff; }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(42,22,66,0.96) 0%, rgba(24,16,48,0.96) 50%, rgba(66,30,30,0.96) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: var(--z-hud);
+    padding: 24px;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow-y: auto;
+  }
+  #overlay .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);
+    border: 2px solid rgba(255,206,90,0.3);
+    border-radius: clamp(14px, 2vw, 24px);
+    padding: clamp(14px, 2.5vw, 28px) clamp(18px, 3vw, 36px);
+    box-shadow: 0 clamp(10px, 2vw, 24px) clamp(32px, 5vw, 64px) rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 clamp(16px, 2.5vw, 32px) rgba(255,138,58,0.2);
+    max-width: min(96%, 520px);
+    width: 100%;
+    max-height: 98%;
+    overflow: visible;
+    backdrop-filter: blur(10px);
+    animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #overlay .cover-art {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: clamp(10px, 1.5vw, 14px);
+    object-fit: cover;
+    margin-bottom: clamp(8px, 1.5vw, 14px);
+    border: 2px solid rgba(255,206,90,0.25);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  #overlay .logo-wrap {
+    margin-top: -10px;
+    margin-bottom: clamp(4px, 1vw, 8px);
+  }
+  #overlay h1 {
+    font-size: clamp(28px, 5.5vw, 46px);
+    font-weight: 700;
+    background: linear-gradient(90deg, #ff9a4a, #ffd75a, #7ad7ff, #ff9a4a);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+    margin-bottom: 2px;
+    text-shadow: none;
+    animation: shimmer 4s linear infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+  #overlay h1.end-title {
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: currentColor;
+    background-clip: initial;
+  }
+  #overlay h2 {
+    font-size: clamp(13px, 2vw, 18px);
+    color: #ff9a5a;
+    letter-spacing: clamp(4px, 1vw, 8px);
+    margin-bottom: clamp(6px, 1vw, 10px);
+    font-weight: 600;
+  }
+  #overlay p.tagline {
+    color: #e8e0d8;
+    font-size: clamp(12px, 1.7vw, 14px);
+    line-height: 1.5;
+    max-width: 400px;
+    margin: 0 auto clamp(10px, 1.8vw, 16px);
+    opacity: 0.85;
+  }
+  #overlay .panel {
+    background: rgba(0,0,0,0.25);
+    border-radius: clamp(10px, 1.4vw, 16px);
+    padding: clamp(10px, 1.5vw, 14px) clamp(12px, 1.8vw, 16px);
+    margin-bottom: clamp(10px, 1.5vw, 14px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  #overlay .panel-compact {
+    padding: clamp(8px, 1.2vw, 12px) clamp(12px, 1.8vw, 16px);
+    margin-bottom: clamp(10px, 1.5vw, 14px);
+  }
+  #overlay .panel-title {
+    color: #ffce5a;
+    font-size: clamp(10px, 1.3vw, 11px);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: clamp(6px, 1vw, 10px);
+    font-weight: 600;
+  }
+  #overlay .help-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: var(--z-help-backdrop);
+    animation: fadeIn 0.2s ease-out;
+  }
+  #overlay .help-backdrop.show { display: block; }
+  #overlay .help-panel {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    max-width: min(92vw, 420px);
+    width: 100%;
+    max-height: min(80vh, 520px);
+    overflow-y: auto;
+    background: #241830;
+    border: 2px solid rgba(255,206,90,0.35);
+    border-radius: clamp(14px, 2vw, 22px);
+    padding: clamp(16px, 2.2vw, 22px);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.7), 0 0 30px rgba(255,138,58,0.25);
+    z-index: var(--z-help-panel);
+    animation: popIn 0.25s ease-out forwards;
+  }
+  #overlay .help-panel.show { display: block; }
+  #overlay .help-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: clamp(10px, 1.5vw, 14px);
+  }
+  #overlay .help-header h3 {
+    color: #ffce5a;
+    font-size: clamp(15px, 2.2vw, 18px);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0;
+  }
+  #overlay .help-close {
+    background: rgba(255,255,255,0.1);
+    color: #ffce5a;
+    border: 1px solid rgba(255,206,90,0.25);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.18s;
+  }
+  #overlay .help-close:hover { background: rgba(255,90,31,0.3); color: #fff; transform: rotate(90deg); }
+  #overlay .help-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: var(--z-help-backdrop);
+    animation: fadeIn 0.2s ease-out;
+  }
+  #overlay .help-backdrop.show { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #overlay .keys {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(4px, 0.7vw, 6px) clamp(8px, 1.2vw, 12px);
+    font-size: clamp(11px, 1.4vw, 12px);
+    color: #f0e8e0;
+    text-align: left;
+  }
+  #overlay .keys b {
+    color: #7ad7ff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: rgba(90,215,255,0.12);
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(90,215,255,0.2);
+    white-space: nowrap;
+  }
+  #overlay .difficulty {
+    display: flex;
+    gap: clamp(6px, 1vw, 10px);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  #overlay .diff-btn {
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.12);
+    color: #ddd;
+    padding: clamp(6px, 1.1vw, 8px) clamp(12px, 2vw, 18px);
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: clamp(12px, 1.6vw, 13px);
+    font-weight: 600;
+    transition: all 0.18s;
+  }
+  #overlay .diff-btn:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
+  #overlay .diff-btn.active {
+    background: linear-gradient(180deg, #ff8a3a, #ff5a1f);
+    border-color: #ff7a2f;
+    color: #1a0a05;
+    box-shadow: 0 3px 12px rgba(255,90,31,0.4);
+  }
+  #overlay .btn {
+    background: linear-gradient(180deg, #ff8a3a, #ff5a1f);
+    color: #1a0a05;
+    border: none;
+    padding: clamp(10px, 1.8vw, 14px) clamp(32px, 6vw, 48px);
+    font-family: inherit;
+    font-size: clamp(16px, 2.6vw, 20px);
+    font-weight: 700;
+    letter-spacing: clamp(2px, 0.5vw, 4px);
+    cursor: pointer;
+    border-radius: 30px;
+    box-shadow: 0 clamp(4px, 0.8vw, 6px) 0 #9a2a00, 0 clamp(6px, 1.4vw, 12px) clamp(16px, 2.8vw, 26px) rgba(255,90,31,0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-top: 4px;
+  }
+  #overlay .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: #ffce5a;
+    border: 2px solid rgba(255,206,90,0.3);
+    box-shadow: none;
+    padding: clamp(6px, 1vw, 9px) clamp(16px, 2.8vw, 28px);
+    font-size: clamp(12px, 1.7vw, 14px);
+    margin-bottom: clamp(4px, 0.8vw, 8px);
+  }
+  #overlay .btn-secondary:hover { background: rgba(255,206,90,0.25); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(255,206,90,0.2); }
+  #overlay .btn:hover { transform: translateY(-2px); box-shadow: 0 clamp(5px, 0.9vw, 8px) 0 #9a2a00, 0 clamp(8px, 1.6vw, 16px) clamp(16px, 3vw, 32px) rgba(255,90,31,0.5); }
+  #overlay .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #9a2a00, 0 4px 12px rgba(255,90,31,0.35); }
+  #overlay .btn:disabled {
+    background: #555;
+    box-shadow: none;
+    color: #aaa;
+    cursor: not-allowed;
+    transform: none;
+  }
+  #overlay .final { color: #ff4a4a; font-size: clamp(18px, 3vw, 26px); margin: 4px 0 14px; }
+  #overlay .hint {
+    color: #999;
+    font-size: clamp(10px, 1.3vw, 11px);
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+  }
+  #overlay .card::-webkit-scrollbar {
+    display: none;
+  }
+  /* 暂停菜单 */
+  #pauseOverlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: var(--z-pause);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  #pauseOverlay .pause-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+    border: 2px solid rgba(255,206,90,0.3);
+    border-radius: 24px;
+    padding: 32px 44px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+  }
+  #pauseOverlay .pause-icon {
+    font-size: 46px;
+    margin-bottom: 12px;
+  }
+  #pauseOverlay .pause-title {
+    font-size: 32px;
+    color: #ffce5a;
+    letter-spacing: 4px;
+    margin-bottom: 24px;
+    font-weight: 700;
+  }
+  #pauseOverlay .pause-card .btn { margin-bottom: 10px; }
+
+  /* 加载界面 */
+  #loadingOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #2a1642 0%, #181030 50%, #421e1e 100%);
+    z-index: var(--z-loading);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+  }
+  #loadingOverlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  @media (max-width: 560px) {
+    #overlay { padding: 14px; }
+    #overlay .card { padding: 12px 14px; }
+    #overlay .cover-art { display: none; }
+    #overlay .logo-wrap { margin-top: -6px; margin-bottom: 3px; }
+    #overlay h1 { font-size: clamp(24px, 6vw, 32px); letter-spacing: 1px; }
+    #overlay h2 { font-size: 12px; margin-bottom: 6px; letter-spacing: 2px; }
+    #overlay p.tagline { font-size: 11px; margin-bottom: 10px; }
+    #overlay .panel { padding: 7px 9px; margin-bottom: 7px; }
+    #overlay .panel-compact { padding: 7px 9px; margin-bottom: 7px; }
+    #overlay .panel-title { font-size: 10px; margin-bottom: 4px; }
+    #overlay .difficulty { gap: 6px; }
+    #overlay .diff-btn { padding: 4px 9px; font-size: 10px; border-radius: 14px; }
+    #overlay .btn { padding: 6px 18px; font-size: 12px; border-radius: 16px; letter-spacing: 1px; }
+    #overlay .btn-secondary { padding: 5px 12px; font-size: 11px; margin-bottom: 4px; }
+    #overlay .help-panel { padding: 12px 14px; max-width: 96vw; max-height: 82vh; }
+    #overlay .help-header h3 { font-size: 13px; }
+    #overlay .help-close { width: 24px; height: 24px; font-size: 12px; }
+    #overlay .help-panel .keys { grid-template-columns: 1fr; gap: 3px 6px; font-size: 10px; }
+    #overlay .help-panel .keys span { display: flex; gap: 6px; align-items: center; }
+    #overlay .keys b { font-size: 10px; padding: 1px 3px; }
+    #overlay .hint { font-size: 9px; margin-top: 6px; }
+    #pauseOverlay .pause-card { padding: 18px 24px; border-radius: 16px; }
+    #pauseOverlay .pause-icon { font-size: 32px; margin-bottom: 8px; }
+    #pauseOverlay .pause-title { font-size: 22px; margin-bottom: 12px; letter-spacing: 2px; }
+    #pauseOverlay .pause-card .btn { margin-bottom: 6px; }
+  }
+  @media (max-width: 420px) {
+    #overlay { padding: 8px; }
+    #overlay .card { padding: 7px 9px; max-height: 100%; overflow-y: auto; }
+    #overlay .logo-wrap { margin-top: -4px; margin-bottom: 2px; }
+    #overlay h1 { font-size: clamp(18px, 7vw, 22px); }
+    #overlay h2 { font-size: 10px; margin-bottom: 3px; letter-spacing: 1px; }
+    #overlay p.tagline { font-size: 10px; margin-bottom: 5px; line-height: 1.4; }
+    #overlay .panel { padding: 4px 6px; margin-bottom: 4px; }
+    #overlay .panel-compact { padding: 4px 6px; margin-bottom: 4px; }
+    #overlay .panel-title { font-size: 9px; margin-bottom: 2px; letter-spacing: 1px; }
+    #overlay .difficulty { gap: 4px; }
+    #overlay .diff-btn { padding: 2px 5px; font-size: 9px; border-radius: 10px; }
+    #overlay .btn { padding: 4px 10px; font-size: 10px; border-radius: 12px; letter-spacing: 0; }
+    #overlay .btn-secondary { padding: 3px 7px; font-size: 9px; margin-bottom: 2px; }
+    #overlay .help-panel { padding: 8px 10px; }
+    #overlay .help-header h3 { font-size: 12px; }
+    #overlay .help-close { width: 22px; height: 22px; }
+    #overlay .help-panel .keys { font-size: 9px; gap: 2px 4px; }
+    #overlay .keys b { font-size: 9px; padding: 1px 2px; }
+    #overlay .hint { font-size: 8px; margin-top: 3px; }
+    #pauseOverlay .pause-card { padding: 12px 16px; border-radius: 12px; }
+    #pauseOverlay .pause-icon { font-size: 24px; margin-bottom: 6px; }
+    #pauseOverlay .pause-title { font-size: 16px; margin-bottom: 8px; letter-spacing: 1px; }
+    #pauseOverlay .pause-card .btn { margin-bottom: 4px; }
+  }
+  @media (max-height: 520px) {
+    #overlay { padding: 10px; }
+    #overlay .card { padding: 10px 12px; }
+    #overlay .cover-art { display: none; }
+    #overlay .logo-wrap { margin-top: 0; margin-bottom: 2px; }
+    #overlay h1 { font-size: clamp(22px, 5vh, 30px); }
+    #overlay h2 { font-size: 11px; margin-bottom: 4px; }
+    #overlay p.tagline { font-size: 10px; margin-bottom: 6px; }
+    #overlay .panel { padding: 6px 8px; margin-bottom: 6px; }
+    #overlay .panel-compact { padding: 6px 8px; margin-bottom: 6px; }
+    #overlay .panel-title { font-size: 9px; margin-bottom: 3px; }
+    #overlay .diff-btn { padding: 3px 7px; font-size: 9px; border-radius: 12px; }
+    #overlay .btn { padding: 5px 14px; font-size: 11px; border-radius: 14px; letter-spacing: 0; }
+    #overlay .btn-secondary { padding: 4px 9px; font-size: 10px; margin-bottom: 3px; }
+    #overlay .help-panel { padding: 10px 12px; max-width: 92vw; max-height: 85vh; }
+    #overlay .help-header h3 { font-size: 13px; }
+    #overlay .help-panel .keys { font-size: 9px; }
+    #pauseOverlay .pause-card { padding: 14px 20px; border-radius: 14px; }
+    #pauseOverlay .pause-icon { font-size: 28px; margin-bottom: 6px; }
+    #pauseOverlay .pause-title { font-size: 20px; margin-bottom: 10px; letter-spacing: 2px; }
+    #pauseOverlay .pause-card .btn { margin-bottom: 5px; }
+  }
+  @media (max-height: 360px) {
+    #overlay { padding: 6px; }
+    #overlay .card { padding: 6px 8px; }
+    #overlay .logo-wrap { margin-bottom: 1px; }
+    #overlay h1 { font-size: 18px; }
+    #overlay h2 { font-size: 9px; margin-bottom: 2px; letter-spacing: 1px; }
+    #overlay p.tagline { font-size: 9px; margin-bottom: 4px; }
+    #overlay .panel { padding: 3px 5px; margin-bottom: 3px; }
+    #overlay .panel-compact { padding: 3px 5px; margin-bottom: 3px; }
+    #overlay .diff-btn { padding: 2px 4px; font-size: 8px; border-radius: 8px; }
+    #overlay .btn { padding: 3px 8px; font-size: 9px; border-radius: 10px; }
+    #overlay .btn-secondary { padding: 2px 6px; font-size: 8px; margin-bottom: 2px; }
+    #overlay .help-panel { padding: 6px 8px; }
+    #overlay .help-header h3 { font-size: 11px; }
+    #overlay .help-panel .keys { font-size: 8px; gap: 1px 3px; }
+    #overlay .hint { font-size: 7px; margin-top: 2px; }
+    #pauseOverlay .pause-card { padding: 10px 14px; border-radius: 10px; }
+    #pauseOverlay .pause-icon { font-size: 20px; margin-bottom: 4px; }
+    #pauseOverlay .pause-title { font-size: 14px; margin-bottom: 6px; }
+  }
+  @media (max-width: 560px) {
+    #overlay { justify-content: flex-start; padding: 16px 0; }
+    #overlay h1 { font-size: 34px; letter-spacing: 2px; }
+    #overlay h2 { font-size: 15px; letter-spacing: 5px; margin-bottom: 12px; }
+    #overlay .card { padding: 22px 20px; }
+    #overlay .panel { padding: 12px 14px; margin-bottom: 12px; }
+    #overlay .keys { gap: 4px 10px; font-size: 11px; }
+    #overlay .tagline { margin-bottom: 12px; }
+    #overlay .diff-btn { padding: 7px 14px; font-size: 12px; }
+    #overlay .btn { padding: 12px 36px; font-size: 17px; }
+    #overlay .hint { margin-top: 12px; }
+    .cat-emoji { font-size: 28px; margin-bottom: 4px; }
+  }
