@@ -8,7 +8,7 @@
   --z-help-panel: 30;
 }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     height: 100%;
     min-height: 100vh;
@@ -222,15 +222,6 @@
     transition: all 0.18s;
   }
   #overlay .help-close:hover { background: rgba(255,90,31,0.3); color: #fff; transform: rotate(90deg); }
-  #overlay .help-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: var(--z-help-backdrop);
-    animation: fadeIn 0.2s ease-out;
-  }
-  #overlay .help-backdrop.show { display: block; }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-6px); }
     to { opacity: 1; transform: translateY(0); }
@@ -355,6 +346,45 @@
   }
   #pauseOverlay .pause-card .btn { margin-bottom: 10px; }
 
+  /* 移动端虚拟按键 */
+  #mobileControls {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-hud);
+    pointer-events: none;
+    touch-action: none;
+  }
+  #mobileControls.show { display: block; }
+  #mobileControls .mbtn {
+    position: absolute;
+    pointer-events: auto;
+    width: clamp(64px, 16vw, 92px);
+    height: clamp(64px, 16vw, 92px);
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.9);
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: background 0.08s, transform 0.08s;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  #mobileControls .mbtn:active, #mobileControls .mbtn.active {
+    background: rgba(255,255,255,0.32);
+    transform: scale(0.95);
+  }
+  #btnLeft  { left:  max(12px, 3vw); bottom: max(14px, 4vh); }
+  #btnRight { left:  max(92px, 22vw); bottom: max(14px, 4vh); }
+  #btnJump  { right: max(92px, 22vw); bottom: max(14px, 4vh); }
+  #btnFire  { right: max(12px, 3vw); bottom: max(14px, 4vh); }
+
   /* 加载界面 */
   #loadingOverlay {
     position: absolute;
@@ -465,17 +495,4 @@
     #pauseOverlay .pause-card { padding: 10px 14px; border-radius: 10px; }
     #pauseOverlay .pause-icon { font-size: 20px; margin-bottom: 4px; }
     #pauseOverlay .pause-title { font-size: 14px; margin-bottom: 6px; }
-  }
-  @media (max-width: 560px) {
-    #overlay { justify-content: flex-start; padding: 16px 0; }
-    #overlay h1 { font-size: 34px; letter-spacing: 2px; }
-    #overlay h2 { font-size: 15px; letter-spacing: 5px; margin-bottom: 12px; }
-    #overlay .card { padding: 22px 20px; }
-    #overlay .panel { padding: 12px 14px; margin-bottom: 12px; }
-    #overlay .keys { gap: 4px 10px; font-size: 11px; }
-    #overlay .tagline { margin-bottom: 12px; }
-    #overlay .diff-btn { padding: 7px 14px; font-size: 12px; }
-    #overlay .btn { padding: 12px 36px; font-size: 17px; }
-    #overlay .hint { margin-top: 12px; }
-    .cat-emoji { font-size: 28px; margin-bottom: 4px; }
   }

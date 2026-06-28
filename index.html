@@ -24,11 +24,12 @@
     <div id="loadingText" style="color:#ffce5a;font-size:clamp(14px,2.4vw,18px);font-weight:600;letter-spacing:2px;">加载中 0%</div>
     <div style="color:#999;font-size:clamp(10px,1.6vw,12px);margin-top:12px;">首次加载可能需要几秒，请稍候</div>
   </div>
-  <canvas id="game" width="960" height="540"></canvas>
+  <canvas id="game" width="960" height="540" role="img" aria-label="喵喵突击队游戏画面"></canvas>
   <div id="hud">
     <div><span class="life">生命</span> <span id="life">3</span></div>
     <div><span class="stage">关卡</span> <span id="stage">1</span></div>
     <div><span class="score">得分</span> <span id="score">0</span></div>
+    <div><span class="score">最高分</span> <span id="highScore">0</span></div>
   </div>
   <div id="overlay">
     <div class="card">
@@ -69,6 +70,14 @@
       <div class="hint">移动端：左右触控移动，点击射击</div>
     </div>
   </div>
+</div>
+
+<!-- 移动端虚拟按键 -->
+<div id="mobileControls" aria-label="移动端控制">
+  <button class="mbtn" id="btnLeft" aria-label="左">◀</button>
+  <button class="mbtn" id="btnRight" aria-label="右">▶</button>
+  <button class="mbtn mbtn-jump" id="btnJump" aria-label="跳">↗</button>
+  <button class="mbtn mbtn-fire" id="btnFire" aria-label="射">●</button>
 </div>
 
 <!-- 暂停遮罩 -->
