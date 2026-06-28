@@ -480,7 +480,7 @@
     gameOver: false, win: false, shake: 0, stageTimeout: null,
     running: false, paused: false, rafId: null, last: 0, difficulty: 'easy',
     stageMessage: null,
-    accumulator: 0
+    accumulator: 0, totalTime: 0
   };
   try {
     const save = JSON.parse(localStorage.getItem('catFlagSquadSave') || '{}');
@@ -1443,6 +1443,7 @@
     if (gameState.paused) return;
     const dt = Math.min(0.1, (t - gameState.last) / 1000 || 0);
     gameState.last = t;
+    gameState.totalTime = (gameState.totalTime || 0) + dt;
     gameState.accumulator += dt;
     const maxSteps = 5;
     let steps = 0;
@@ -1498,7 +1499,7 @@
     gameState.running = false;
     gameState.paused = false;
     document.getElementById('pauseOverlay').style.display = 'none';
-    gameState.camX = 0; gameState.score = 0; gameState.stage = 1; gameState.shake = 0;
+    gameState.camX = 0; gameState.score = 0; gameState.stage = 1; gameState.shake = 0; gameState.totalTime = 0;
     buildLevel();
     player.life = CONFIG.player.life[diff] || CONFIG.player.life.normal;
     player.weapon = 'normal'; player.weaponTimer = 0;

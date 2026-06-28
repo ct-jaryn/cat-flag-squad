@@ -126,12 +126,6 @@
     0% { background-position: 0% 50%; }
     100% { background-position: 300% 50%; }
   }
-  #overlay h1.end-title {
-    background: none;
-    -webkit-background-clip: initial;
-    -webkit-text-fill-color: currentColor;
-    background-clip: initial;
-  }
   #overlay h2 {
     font-size: clamp(13px, 2vw, 18px);
     color: #ff9a5a;
