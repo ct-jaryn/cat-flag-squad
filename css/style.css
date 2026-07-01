@@ -339,6 +339,52 @@
     font-weight: 700;
   }
   #pauseOverlay .pause-card .btn { margin-bottom: 10px; }
+  #pauseOverlay .pause-stage-select {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+  #pauseOverlay .pause-stage-title {
+    color: #ffce5a;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  #pauseOverlay .pause-stage-list {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  #pauseOverlay .pause-stage-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #ddd;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  #pauseOverlay .pause-stage-btn:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+  #pauseOverlay .pause-stage-btn.active {
+    background: linear-gradient(180deg, #ff8a3a, #ff5a1f);
+    border-color: #ff7a2f;
+    color: #1a0a05;
+    box-shadow: 0 3px 10px rgba(255,90,31,0.4);
+  }
+  #pauseOverlay .btn-stage {
+    background: linear-gradient(180deg, #7ad7ff, #3a8aff);
+    color: #061028;
+    box-shadow: 0 4px 0 #1e5aa0, 0 8px 18px rgba(58,138,255,0.35);
+    margin-bottom: 0;
+  }
+  #pauseOverlay .btn-stage:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #1e5aa0, 0 10px 22px rgba(58,138,255,0.45); }
+  #pauseOverlay .btn-stage:active { transform: translateY(2px); box-shadow: 0 2px 0 #1e5aa0, 0 4px 10px rgba(58,138,255,0.35); }
 
   /* 移动端虚拟按键 */
   #mobileControls {

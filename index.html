@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2">
+<link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
 <div id="wrap">
@@ -87,10 +87,21 @@
     <h2 class="pause-title">游戏暂停</h2>
     <button class="btn" id="resumeBtn">继续游戏</button>
     <button class="btn btn-secondary" id="pauseRestartBtn">重新开始</button>
+    <div class="pause-stage-select">
+      <div class="pause-stage-title">选择关卡</div>
+      <div class="pause-stage-list" id="pauseStageList">
+        <button class="pause-stage-btn active" data-stage="1">一</button>
+        <button class="pause-stage-btn" data-stage="2">二</button>
+        <button class="pause-stage-btn" data-stage="3">三</button>
+        <button class="pause-stage-btn" data-stage="4">四</button>
+        <button class="pause-stage-btn" data-stage="5">五</button>
+      </div>
+      <button class="btn btn-stage" id="pauseStageStartBtn">从该关卡开始</button>
+    </div>
   </div>
 </div>
 
-<script src="js/levels.js?v=6"></script>
-<script src="js/game.js?v=6"></script>
+<script src="js/levels.js?v=7"></script>
+<script src="js/game.js?v=7"></script>
 </body>
 </html>

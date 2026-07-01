@@ -1629,12 +1629,28 @@
     const pauseOverlay = document.getElementById('pauseOverlay');
     if (gameState.paused) {
       pauseOverlay.style.display = 'flex';
+      updatePauseStageUI();
     } else {
       pauseOverlay.style.display = 'none';
       gameState.last = performance.now();
       gameState.accumulator = 0;
     }
   }
+
+  let pauseSelectedStage = 1;
+  function updatePauseStageUI() {
+    pauseSelectedStage = Math.max(1, Math.min(5, gameState.stage || 1));
+    document.querySelectorAll('.pause-stage-btn').forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.stage, 10) === pauseSelectedStage);
+    });
+  }
+  document.querySelectorAll('.pause-stage-btn').forEach(btn => {
+    btn.onclick = () => {
+      pauseSelectedStage = parseInt(btn.dataset.stage, 10);
+      document.querySelectorAll('.pause-stage-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    };
+  });
 
 
 
@@ -1659,15 +1675,16 @@
   // 暂停菜单按钮
   document.getElementById('resumeBtn').onclick = () => togglePause();
   document.getElementById('pauseRestartBtn').onclick = () => { audio.init(); audio.resume(); startGame(gameState.difficulty); };
+  document.getElementById('pauseStageStartBtn').onclick = () => { audio.init(); audio.resume(); startGame(gameState.difficulty, pauseSelectedStage); };
 
-  function startGame(diff) {
+  function startGame(diff, startStage) {
     if (gameState.stageMessage) { gameState.stageMessage.remove(); gameState.stageMessage = null; }
     if (gameState.stageTimeout) { clearTimeout(gameState.stageTimeout); gameState.stageTimeout = null; }
     if (gameState.rafId) cancelAnimationFrame(gameState.rafId);
     gameState.running = false;
     gameState.paused = false;
     document.getElementById('pauseOverlay').style.display = 'none';
-    gameState.camX = 0; gameState.score = 0; gameState.stage = 1; gameState.shake = 0; gameState.totalTime = 0;
+    gameState.camX = 0; gameState.score = 0; gameState.stage = Math.max(1, Math.min(5, startStage || 1)); gameState.shake = 0; gameState.totalTime = 0;
     buildLevel();
     player.life = CONFIG.player.life[diff] || CONFIG.player.life.normal;
     player.maxLife = player.life;
