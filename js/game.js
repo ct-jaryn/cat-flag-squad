@@ -87,7 +87,7 @@
     hud: { progressBarY: 16, progressBarW: 200, progressBarH: 6, weaponBar: { x: 108, w: 38, h: 6 } },
     pickup: { w: 20, h: 20, score: 50, box: { x: 12, y: 34, w: 140, h: 22 } },
     render: {
-      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.2, h: 3.2 }, boss4: { w: 4.5, h: 4.5 }, boss5: { w: 3.8, h: 3.8 } },
+      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.8, h: 2.6 }, boss4: { w: 4.2, h: 4.2 }, boss5: { w: 3.6, h: 2.6 } },
       bladeAmplitude: 60,
       offscreenMargin: 40,
       trailFactor: { player: 0.02, enemy: 0.012 },
