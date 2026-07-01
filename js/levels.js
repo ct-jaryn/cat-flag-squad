@@ -102,7 +102,7 @@ const LEVEL_DATA = {
       [2800, -120, 'stand'], [4000, -130, 'patrol', 4000, 4140],
       [5200, -120, 'patrol', 5200, 5350],
     ],
-    boss: { x: -320, y: -90, yAbs: false, type: 'turret', w: 80, h: 100, fireCD: 1.0, hpMult: 1.3 },
+    boss: { x: -320, y: -90, yAbs: false, type: 'boss3', w: 80, h: 100, fireCD: 1.0, hpMult: 1.3 },
     pickups: [
       [700, -160, 'rapid'],
       [1900, -230, 'spread'],
@@ -150,7 +150,7 @@ const LEVEL_DATA = {
       [5640, -120, 'stand'],
       [5820, -180, 'sniper'],
     ],
-    boss: { x: -480, y: 150, yAbs: true, type: 'helicopter', w: 170, h: 100, fireCD: 0.85, hpMult: 1.4, centerY: 190, radius: 240 },
+    boss: { x: -480, y: 150, yAbs: true, type: 'boss4', w: 170, h: 100, fireCD: 0.85, hpMult: 1.4, centerY: 190, radius: 240 },
     pickups: [
       [960, -200, 'rapid'],
       [2220, -140, 'life'],
@@ -184,7 +184,7 @@ const LEVEL_DATA = {
       [2600, -130, 'stand'], [3700, -140, 'patrol', 3700, 3840],
       [4900, -130, 'patrol', 4900, 5050],
     ],
-    boss: { x: -300, y: -90, yAbs: false, type: 'turret', w: 90, h: 110, fireCD: 0.75, hpMult: 1.8 },
+    boss: { x: -300, y: -90, yAbs: false, type: 'boss5', w: 90, h: 110, fireCD: 0.75, hpMult: 1.8 },
     pickups: [
       [650, -170, 'rapid'],
       [1800, -240, 'spread'],
