@@ -311,7 +311,7 @@
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const aabb = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-  const bulletHitPlatform = b => { for (const p of world.platforms) if (aabb(b, p)) return true; return false; };
+  const bulletHitPlatform = b => false; // 子弹可穿透平台等所有障碍物
   const imageReady = img => img.complete && img.naturalWidth > 0;
   const enemyDirToPlayer = e => (player.x + player.w / 2) < (e.x + e.w / 2) ? -1 : 1;
 
