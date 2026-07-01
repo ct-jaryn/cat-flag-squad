@@ -17,6 +17,13 @@ const LEVEL_DATA = {
       [4050, 'stand'], [4400, 'patrol', 4350, 4550], [4750, 'stand'],
       [5300, 'patrol', 5250, 5450], [5800, 'stand'], [6050, 'stand'],
     ],
+    specialEnemies: [
+      // [x, 类型, 巡逻min, 巡逻max]
+      [1100, 'mousetank', 1000, 1300],
+      [2450, 'mousetank', 2350, 2600],
+      [3700, 'mousetank', 3600, 3850],
+      [5600, 'mousetank', 5500, 5750],
+    ],
     snipers: [
       [920, -210], [2100, -240], [3300, -230], [4350, -250], [5750, -240]
     ],
@@ -68,6 +75,13 @@ const LEVEL_DATA = {
       [5740, -120, 'stand'],
       [5920, -180, 'sniper'],
     ],
+    specialEnemies: [
+      // [x, yAbs, centerY, radius, 类型]
+      [1400, true, 160, 140, 'paratrooper'],
+      [2400, true, 180, 120, 'paratrooper'],
+      [3600, true, 170, 160, 'paratrooper'],
+      [5200, true, 150, 180, 'paratrooper'],
+    ],
     boss: { x: -500, y: 160, yAbs: true, type: 'helicopter', w: 160, h: 90, fireCD: 1.0, centerY: 200, radius: 220 },
     pickups: [
       [1060, -200, 'rapid'],
@@ -101,6 +115,12 @@ const LEVEL_DATA = {
       [700, -130, 'stand'], [1500, -110, 'patrol', 1500, 1640],
       [2800, -120, 'stand'], [4000, -130, 'patrol', 4000, 4140],
       [5200, -120, 'patrol', 5200, 5350],
+    ],
+    specialEnemies: [
+      [1200, 'rat', 1100, 1400],
+      [2500, 'rat', 2400, 2700],
+      [3900, 'rat', 3800, 4100],
+      [5600, 'rat', 5500, 5800],
     ],
     boss: { x: -320, y: -90, yAbs: false, type: 'boss3', w: 80, h: 100, fireCD: 1.0, hpMult: 1.3 },
     pickups: [
@@ -150,6 +170,12 @@ const LEVEL_DATA = {
       [5640, -120, 'stand'],
       [5820, -180, 'sniper'],
     ],
+    specialEnemies: [
+      [1200, true, 170, 130, 'skyknight'],
+      [2600, true, 190, 150, 'skyknight'],
+      [4200, true, 160, 140, 'skyknight'],
+      [5600, true, 180, 160, 'skyknight'],
+    ],
     boss: { x: -480, y: 150, yAbs: true, type: 'boss4', w: 170, h: 100, fireCD: 0.85, hpMult: 1.4, centerY: 190, radius: 240 },
     pickups: [
       [960, -200, 'rapid'],
@@ -183,6 +209,12 @@ const LEVEL_DATA = {
       [650, -140, 'stand'], [1400, -120, 'patrol', 1400, 1540],
       [2600, -130, 'stand'], [3700, -140, 'patrol', 3700, 3840],
       [4900, -130, 'patrol', 4900, 5050],
+    ],
+    specialEnemies: [
+      [1000, 'flameguard', 900, 1200],
+      [2300, 'flameguard', 2200, 2500],
+      [3600, 'flameguard', 3500, 3800],
+      [5400, 'flameguard', 5300, 5600],
     ],
     boss: { x: -300, y: -90, yAbs: false, type: 'boss5', w: 90, h: 110, fireCD: 0.75, hpMult: 1.8 },
     pickups: [

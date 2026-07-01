@@ -87,7 +87,7 @@
     hud: { progressBarY: 16, progressBarW: 200, progressBarH: 6, weaponBar: { x: 108, w: 38, h: 6 } },
     pickup: { w: 20, h: 20, score: 50, box: { x: 12, y: 34, w: 140, h: 22 } },
     render: {
-      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.8, h: 2.6 }, boss4: { w: 4.2, h: 4.2 }, boss5: { w: 3.6, h: 2.6 } },
+      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.8, h: 2.6 }, boss4: { w: 4.2, h: 4.2 }, boss5: { w: 3.6, h: 2.6 }, enemy1: { w: 1.6, h: 1.2 }, enemy2: { w: 1.4, h: 1.2 }, enemy3: { w: 1.3, h: 1.2 }, enemy4: { w: 1.4, h: 1.3 }, enemy5: { w: 1.5, h: 1.3 } },
       bladeAmplitude: 60,
       offscreenMargin: 40,
       trailFactor: { player: 0.02, enemy: 0.012 },
@@ -446,7 +446,12 @@
     boss5: new Image(),
     bg3: new Image(),
     bg4: new Image(),
-    bg5: new Image()
+    bg5: new Image(),
+    enemy1: new Image(),
+    enemy2: new Image(),
+    enemy3: new Image(),
+    enemy4: new Image(),
+    enemy5: new Image()
   };
   const assetMeta = [
     { key: 'bg', src: 'assets/cat_bg.jpg?v=3', required: true },
@@ -460,6 +465,11 @@
     { key: 'bg3', src: 'assets/bg3_city.jpg?v=1', required: false },
     { key: 'bg4', src: 'assets/bg4_fortress.jpg?v=1', required: false },
     { key: 'bg5', src: 'assets/bg5_lava.jpg?v=1', required: false },
+    { key: 'enemy1', src: 'assets/enemy1_mousetank.png?v=1', required: false },
+    { key: 'enemy2', src: 'assets/enemy2_paratrooper.png?v=1', required: false },
+    { key: 'enemy3', src: 'assets/enemy3_rat.png?v=1', required: false },
+    { key: 'enemy4', src: 'assets/enemy4_skyknight.png?v=1', required: false },
+    { key: 'enemy5', src: 'assets/enemy5_flameguard.png?v=1', required: false },
   ];
   let assetsReady = false;
   function loadAssets(onProgress, cb) {
@@ -542,6 +552,23 @@
       if (type === 'patrol') { en.patrolMin = min; en.patrolMax = max; }
       world.enemies.push(en);
     }
+    // 关卡特色怪物
+    for (const e of data.specialEnemies || []) {
+      if (e.length === 5) {
+        // [x, yAbs, centerY, radius, type] 飞行类
+        const [sx, yAbs, centerY, radius, type] = e;
+        const sy = yAbs ? centerY : GROUND_Y + centerY;
+        const en = makeEnemy(sx, sy, type);
+        en.phase = 0; en.centerX = sx; en.centerY = centerY; en.radius = radius;
+        world.enemies.push(en);
+      } else {
+        // [x, type, min, max] 地面巡逻类
+        const [sx, type, min, max] = e;
+        const en = makeEnemy(sx, GROUND_Y - CONFIG.enemy.spawnOffset.infantry, type);
+        en.patrolMin = min; en.patrolMax = max;
+        world.enemies.push(en);
+      }
+    }
 
     // Boss
     const bx = data.boss.x < 0 ? WORLD_LEN + data.boss.x : data.boss.x;
@@ -572,7 +599,12 @@
     helicopter: { w: 30, h: 40, hpKey: 'helicopter', speed: 0, fireCD: CONFIG.enemy.fireCD.helicopter },
     boss3:      { w: 80, h: 100, hpKey: 'turret', speed: 0, fireCD: CONFIG.enemy.fireCD.turret },
     boss4:      { w: 170, h: 100, hpKey: 'helicopter', speed: 0, fireCD: CONFIG.enemy.fireCD.helicopter },
-    boss5:      { w: 90, h: 110, hpKey: 'turret', speed: 0, fireCD: CONFIG.enemy.fireCD.turret }
+    boss5:      { w: 90, h: 110, hpKey: 'turret', speed: 0, fireCD: CONFIG.enemy.fireCD.turret },
+    mousetank:  { w: 50, h: 40, hpBase: 4,       speed: -25, fireCD: CONFIG.enemy.fireCD.patrol },
+    paratrooper:{ w: 36, h: 44, hpBase: 2,       speed: 0,   fireCD: CONFIG.enemy.fireCD.stand },
+    rat:        { w: 60, h: 36, hpBase: 3,       speed: -90, fireCD: CONFIG.enemy.fireCD.patrol },
+    skyknight:  { w: 40, h: 44, hpBase: 3,       speed: 0,   fireCD: CONFIG.enemy.fireCD.sniper },
+    flameguard: { w: 46, h: 48, hpBase: 5,       speed: -30, fireCD: CONFIG.enemy.fireCD.stand }
   };
 
   function makeEnemy(x, y, type) {
@@ -683,7 +715,7 @@
     const dy = (player.y + player.h / 2) - (e.y + e.h / 2);
     const d = Math.hypot(dx, dy) || 1;
     const sp = CONFIG.enemy.bulletSpeed[e.type] || CONFIG.enemy.bulletSpeed.default;
-    const centerFire = e.type === 'turret' || e.type === 'helicopter' || e.type === 'boss3' || e.type === 'boss4' || e.type === 'boss5';
+    const centerFire = e.type === 'turret' || e.type === 'helicopter' || e.type === 'boss3' || e.type === 'boss4' || e.type === 'boss5' || e.type === 'mousetank' || e.type === 'flameguard';
     let bx = centerFire ? e.x + e.w / 2 : (e.dir > 0 ? e.x + e.w : e.x);
     const ebb = CONFIG.render.bullet.enemy;
     world.enemyBullets.push({
@@ -874,20 +906,48 @@
       // 朝向玩家
       e.dir = enemyDirToPlayer(e);
       // 巡逻 / 飞行
-      if (e.type === 'patrol') {
+      if (e.type === 'patrol' || e.type === 'mousetank' || e.type === 'rat' || e.type === 'flameguard') {
         e.x += e.vx * dt;
         if (e.x < e.patrolMin) { e.x = e.patrolMin; e.vx = Math.abs(e.vx); }
         if (e.x > e.patrolMax) { e.x = e.patrolMax; e.vx = -Math.abs(e.vx); }
       }
-      // 直升机/飞艇Boss运动：绕中心盘旋
-      if (e.type === 'helicopter' || e.type === 'boss4') {
+      // 直升机/飞艇Boss/空降兵/天空骑士运动：绕中心盘旋或漂浮
+      if (e.type === 'helicopter' || e.type === 'boss4' || e.type === 'paratrooper' || e.type === 'skyknight') {
         e.phase += dt * CONFIG.enemy.helicopterPhaseSpeed;
         e.x = e.centerX + Math.cos(e.phase) * e.radius;
         e.y = e.centerY + Math.sin(e.phase * CONFIG.enemy.helicopterYPhaseMult) * CONFIG.enemy.helicopterAmplitude;
         e.dir = enemyDirToPlayer(e);
       }
-      // 炮台/机甲/坦克Boss固定在地面上
-      if (e.type === 'turret' || e.type === 'boss3' || e.type === 'boss5') e.y = GROUND_Y - e.h;
+      // 炮台/机甲/坦克Boss/地面特色怪物固定在地面上
+      if (e.type === 'turret' || e.type === 'boss3' || e.type === 'boss5' || e.type === 'mousetank' || e.type === 'rat' || e.type === 'flameguard') e.y = GROUND_Y - e.h;
+      // 射击：仅在玩家在镜头内 & 一定距离
+      const dxp = (player.x + player.w / 2) - (e.x + e.w / 2);
+      const dyp = (player.y + player.h / 2) - (e.y + e.h / 2);
+      const dist = Math.abs(dxp);
+      const verticalOK = Math.abs(player.y - e.y) < (CONFIG.enemy.activationRange.y[e.type] || CONFIG.enemy.activationRange.y.default);
+      if (e.fireCD <= 0 && dist < CONFIG.enemy.activationRange.x && verticalOK) {
+        // 只在镜头附近
+        if (e.x > gameState.camX - CONFIG.enemy.activationRange.margin && e.x < gameState.camX + W + CONFIG.enemy.activationRange.margin) {
+          if (e.type === 'flameguard') {
+            // 火焰喷射：发射3发散射火焰弹
+            const baseAng = Math.atan2(dyp, dxp);
+            for (let i = -1; i <= 1; i++) {
+              const ang = baseAng + i * 0.18;
+              const sp = CONFIG.enemy.bulletSpeed.default * 0.7;
+              const ebb = CONFIG.render.bullet.enemy;
+              world.enemyBullets.push({
+                x: e.x + e.w / 2, y: e.y + e.h * ebb.spawnY, w: ebb.w, h: ebb.h,
+                vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life: CONFIG.timing.enemyBulletLife * 0.7
+              });
+            }
+            audio.play('enemyShoot');
+            e.fireCD = rand(...CONFIG.enemy.fireCD[e.type]);
+          } else {
+            enemyShoot(e);
+            e.fireCD = rand(...CONFIG.enemy.fireCD[e.type]);
+          }
+        }
+      }
     }
 
     // 玩家子弹
@@ -1255,6 +1315,30 @@
       } else {
         const H = CONFIG.art.enemy.fallback.helicopter;
         ctx.fillStyle = H.body.color; ctx.fillRect(H.body.x, H.body.y, H.body.w, H.body.h);
+      }
+      // 血条
+      const Hb = CONFIG.art.enemy.fallback.helicopter.bloodBar;
+      ctx.fillStyle = CONFIG.colors.enemyBloodBg;
+      ctx.fillRect(Hb.x, Hb.y, Hb.w, Hb.h);
+      ctx.fillStyle = CONFIG.colors.enemyBloodFill;
+      ctx.fillRect(Hb.x, Hb.y, Hb.w * (e.hp / e.maxhp), Hb.h);
+    } else if (e.type === 'mousetank' || e.type === 'paratrooper' || e.type === 'rat' || e.type === 'skyknight' || e.type === 'flameguard') {
+      const key = e.type;
+      const assetMap = { mousetank: 'enemy1', paratrooper: 'enemy2', rat: 'enemy3', skyknight: 'enemy4', flameguard: 'enemy5' };
+      const assetKey = assetMap[key];
+      const es = CONFIG.render.imageScale[assetKey];
+      const imgW = e.w * es.w;
+      const imgH = e.h * es.h;
+      if (assetsReady && imageReady(assets[assetKey])) {
+        ctx.save();
+        ctx.translate(0, e.h / 2 - imgH / 2);
+        if (e.dir < 0) ctx.scale(-1, 1);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(assets[assetKey], -imgW / 2, 0, imgW, imgH);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = '#888';
+        ctx.fillRect(-e.w / 2, 0, e.w, e.h);
       }
       // 血条
       const Hb = CONFIG.art.enemy.fallback.helicopter.bloodBar;
