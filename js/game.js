@@ -447,7 +447,7 @@
     { key: 'hero', src: 'assets/cat_hero_sheet.png?v=2', required: true },
     { key: 'boss', src: 'assets/cat_boss.png?v=2', required: false },
     { key: 'skyBg', src: 'assets/sky_bg.jpg?v=3', required: false },
-    { key: 'heliBoss', src: 'assets/heli_boss.png?v=1', required: false },
+    { key: 'heliBoss', src: 'assets/heli_boss.png?v=2', required: false },
     
   ];
   let assetsReady = false;
