@@ -87,7 +87,7 @@
     hud: { progressBarY: 16, progressBarW: 200, progressBarH: 6, weaponBar: { x: 108, w: 38, h: 6 } },
     pickup: { w: 20, h: 20, score: 50, box: { x: 12, y: 34, w: 140, h: 22 } },
     render: {
-      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.8, h: 2.6 }, boss4: { w: 4.2, h: 4.2 }, boss5: { w: 3.6, h: 2.6 }, enemy1: { w: 1.5, h: 1.2 }, enemy2: { w: 1.4, h: 1.2 }, enemy3: { w: 1.45, h: 1.2 }, enemy4: { w: 1.4, h: 1.2 }, enemy5: { w: 1.45, h: 1.2 } },
+      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.8, h: 2.6 }, boss4: { w: 3.0, h: 2.2 }, boss5: { w: 3.6, h: 2.6 }, enemy1: { w: 1.9, h: 1.5 }, enemy2: { w: 1.8, h: 1.5 }, enemy3: { w: 1.8, h: 1.5 }, enemy4: { w: 1.8, h: 1.5 }, enemy5: { w: 1.8, h: 1.5 } },
       bladeAmplitude: 60,
       offscreenMargin: 40,
       trailFactor: { player: 0.02, enemy: 0.012 },
@@ -454,22 +454,22 @@
     enemy5: new Image()
   };
   const assetMeta = [
-    { key: 'bg', src: 'assets/cat_bg.jpg?v=3', required: true },
-    { key: 'hero', src: 'assets/cat_hero_sheet.png?v=2', required: true },
-    { key: 'boss', src: 'assets/cat_boss.png?v=2', required: false },
-    { key: 'skyBg', src: 'assets/sky_bg.jpg?v=3', required: false },
-    { key: 'heliBoss', src: 'assets/heli_boss.png?v=2', required: false },
-    { key: 'boss3', src: 'assets/boss3_mech.png?v=1', required: false },
-    { key: 'boss4', src: 'assets/boss4_airship.png?v=1', required: false },
-    { key: 'boss5', src: 'assets/boss5_tank.png?v=1', required: false },
-    { key: 'bg3', src: 'assets/bg3_city.jpg?v=1', required: false },
-    { key: 'bg4', src: 'assets/bg4_fortress.jpg?v=1', required: false },
-    { key: 'bg5', src: 'assets/bg5_lava.jpg?v=1', required: false },
-    { key: 'enemy1', src: 'assets/enemy1_mousetank.png?v=1', required: false },
-    { key: 'enemy2', src: 'assets/enemy2_paratrooper.png?v=1', required: false },
-    { key: 'enemy3', src: 'assets/enemy3_rat.png?v=1', required: false },
-    { key: 'enemy4', src: 'assets/enemy4_skyknight.png?v=1', required: false },
-    { key: 'enemy5', src: 'assets/enemy5_flameguard.png?v=1', required: false },
+    { key: 'bg', src: 'assets/cat_bg.jpg?v=4', required: true },
+    { key: 'hero', src: 'assets/cat_hero_sheet.png?v=3', required: true },
+    { key: 'boss', src: 'assets/cat_boss.png?v=3', required: false },
+    { key: 'skyBg', src: 'assets/sky_bg.jpg?v=4', required: false },
+    { key: 'heliBoss', src: 'assets/heli_boss.png?v=3', required: false },
+    { key: 'boss3', src: 'assets/boss3_mech.png?v=2', required: false },
+    { key: 'boss4', src: 'assets/boss4_airship.png?v=2', required: false },
+    { key: 'boss5', src: 'assets/boss5_tank.png?v=2', required: false },
+    { key: 'bg3', src: 'assets/bg3_city.jpg?v=2', required: false },
+    { key: 'bg4', src: 'assets/bg4_fortress.jpg?v=2', required: false },
+    { key: 'bg5', src: 'assets/bg5_lava.jpg?v=2', required: false },
+    { key: 'enemy1', src: 'assets/enemy1_mousetank.png?v=2', required: false },
+    { key: 'enemy2', src: 'assets/enemy2_paratrooper.png?v=2', required: false },
+    { key: 'enemy3', src: 'assets/enemy3_rat.png?v=2', required: false },
+    { key: 'enemy4', src: 'assets/enemy4_skyknight.png?v=2', required: false },
+    { key: 'enemy5', src: 'assets/enemy5_flameguard.png?v=2', required: false },
   ];
   let assetsReady = false;
   function loadAssets(onProgress, cb) {
@@ -1259,7 +1259,24 @@
   function drawEnemy(e) {
     if (e.dead) return;
     const sx = e.x - gameState.camX;
-    if (sx + e.w < 0 || sx > W) return;
+    // 估算图片实际显示宽度用于裁剪判断（加载完成后用缩放后尺寸）
+    let renderW = e.w;
+    let renderH = e.h;
+    if (e.type === 'turret') {
+      renderW = e.w * CONFIG.render.imageScale.turret.w;
+      renderH = e.h * CONFIG.render.imageScale.turret.h;
+    } else if (e.type === 'helicopter') {
+      renderW = e.w * CONFIG.render.imageScale.helicopter.w;
+      renderH = e.h * CONFIG.render.imageScale.helicopter.h;
+    } else if (e.type === 'boss3' || e.type === 'boss4' || e.type === 'boss5') {
+      const bs = CONFIG.render.imageScale[e.type];
+      renderW = e.w * bs.w; renderH = e.h * bs.h;
+    } else if (['mousetank','paratrooper','rat','skyknight','flameguard'].includes(e.type)) {
+      const assetMap = { mousetank: 'enemy1', paratrooper: 'enemy2', rat: 'enemy3', skyknight: 'enemy4', flameguard: 'enemy5' };
+      const es = CONFIG.render.imageScale[assetMap[e.type]];
+      renderW = e.w * es.w; renderH = e.h * es.h;
+    }
+    if (sx + renderW / 2 < 0 || sx - renderW / 2 > W) return;
     ctx.save();
     ctx.translate(sx + e.w / 2, e.y);
     if (e.dir < 0) ctx.scale(-1, 1);
@@ -1341,8 +1358,13 @@
         ctx.drawImage(assets[assetKey], -imgW / 2, 0, imgW, imgH);
         ctx.restore();
       } else {
-        const H = CONFIG.art.enemy.fallback.helicopter;
-        ctx.fillStyle = H.body.color; ctx.fillRect(H.body.x, H.body.y, H.body.w, H.body.h);
+        // 回退：明显的大方块 + Boss 字样，方便调试
+        ctx.fillStyle = '#b03030';
+        ctx.fillRect(-e.w / 2, 0, e.w, e.h);
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('BOSS', 0, e.h / 2);
       }
       // 血条
       const Hb = CONFIG.art.enemy.fallback.helicopter.bloodBar;
