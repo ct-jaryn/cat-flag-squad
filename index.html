@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>喵喵突击队</title>
+<link rel="stylesheet" href="css/style.css?v=5">
+</head>
+<body>
+<div id="wrap">
+  <!-- 加载界面 -->
+  <div id="loadingOverlay">
+    <div class="loading-mascot">🐱</div>
+    <h1 class="loading-title">喵喵突击队</h1>
+    <div class="loading-progress">
+      <div id="loadingBar" class="loading-bar"></div>
+    </div>
+    <div id="loadingText" class="loading-text">核心资源加载中 0%</div>
+    <div class="loading-note">进入游戏后会继续补齐其他美术资源</div>
+  </div>
+  <canvas id="game" width="960" height="540" role="img" aria-label="喵喵突击队游戏画面"></canvas>
+  <div id="hud">
+    <div><span class="life">生命</span> <span id="life">3</span></div>
+    <div><span class="stage">关卡</span> <span id="stage">1</span></div>
+    <div><span class="score">得分</span> <span id="score">0</span></div>
+    <div><span class="score">最高分</span> <span id="highScore">0</span></div>
+  </div>
+  <div id="overlay">
+    <div class="card menu-card" aria-labelledby="menuTitle">
+      <img class="cover-art" id="coverArt" src="assets/cover.jpg?v=3" alt="喵喵突击队封面" aria-hidden="true">
+      <div class="menu-status">
+        <span><i></i>喵星防线待命</span>
+        <span>五区战役</span>
+      </div>
+      <div class="logo-wrap">
+        <h1 id="menuTitle">喵喵突击队</h1>
+        <h2>守护喵星</h2>
+      </div>
+      <p class="tagline">黑猫坦克突破前线，带队夺回五区防线。</p>
+      <div class="mission-chips" aria-label="任务标签">
+        <span>空投补给</span>
+        <span>Boss 威胁</span>
+        <span>城堡终战</span>
+      </div>
+
+      <div class="panel panel-compact">
+        <div class="panel-title">难度选择</div>
+        <div class="difficulty" role="group" aria-label="难度选择">
+          <button class="diff-btn active" data-diff="easy" type="button" aria-pressed="true">
+            <span class="diff-name">简单</span>
+            <span class="diff-note">稳扎稳打</span>
+          </button>
+          <button class="diff-btn" data-diff="normal" type="button" aria-pressed="false">
+            <span class="diff-name">普通</span>
+            <span class="diff-note">标准火力</span>
+          </button>
+          <button class="diff-btn" data-diff="hard" type="button" aria-pressed="false">
+            <span class="diff-name">困难</span>
+            <span class="diff-note">高压突围</span>
+          </button>
+        </div>
+        <div class="difficulty-summary" id="difficultySummary" aria-live="polite">敌人韧性较低，弹幕更稀疏，适合首轮推进。</div>
+      </div>
+
+      <div class="menu-actions">
+        <button class="btn" id="startBtn" type="button">开始突击</button>
+        <button class="btn btn-secondary" id="helpBtn" type="button" aria-controls="helpPanel" aria-expanded="false">操作说明</button>
+      </div>
+      <div class="hint">手机会自动显示虚拟按键；桌面端可用键盘或鼠标开火。</div>
+    </div>
+    <div class="help-backdrop" id="helpBackdrop"></div>
+    <div class="help-panel" id="helpPanel" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="helpTitle">
+      <div class="help-header">
+        <h3 id="helpTitle">操作说明</h3>
+        <button class="help-close" id="helpClose" type="button" aria-label="关闭">✕</button>
+      </div>
+      <div class="keys">
+        <span><b>A / D</b> 或 <b>← / →</b></span><span>左右移动 / 组合瞄准</span>
+        <span><b>空格</b></span><span>跳跃（空中可二段跳）</span>
+        <span><b>W / S</b></span><span>瞄准上方 / 下方</span>
+        <span><b>WD / WA / SD / SA</b></span><span>45° 斜射</span>
+        <span><b>J / 鼠标点击</b></span><span>射击</span>
+        <span><b>K</b></span><span>卧倒射击（平台+空格落下）</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 移动端虚拟按键 -->
+<div id="mobileControls" aria-label="移动端控制">
+  <div class="mobile-pad mobile-pad-move" aria-label="移动与瞄准">
+    <button class="mbtn mbtn-up" id="btnUp" aria-label="上瞄准">▲</button>
+    <button class="mbtn" id="btnLeft" aria-label="左">◀</button>
+    <button class="mbtn mbtn-down" id="btnDown" aria-label="下瞄准或卧倒">▼</button>
+    <button class="mbtn" id="btnRight" aria-label="右">▶</button>
+  </div>
+  <div class="mobile-pad mobile-pad-actions" aria-label="动作">
+    <button class="mbtn mbtn-jump" id="btnJump" aria-label="跳">↗</button>
+    <button class="mbtn mbtn-fire" id="btnFire" aria-label="射">●</button>
+  </div>
+</div>
+
+<!-- 暂停遮罩 -->
+<div id="pauseOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="pauseTitle">
+  <div class="pause-card">
+    <div class="pause-topline">
+      <span class="pause-kicker"><i></i>战术暂停</span>
+      <span class="pause-status" id="pauseStatus">第一关 · 简单</span>
+    </div>
+    <div class="pause-title-row">
+      <div class="pause-mark" aria-hidden="true"><span></span><span></span></div>
+      <div>
+        <h2 class="pause-title" id="pauseTitle">游戏暂停</h2>
+        <p class="pause-subtitle">火力已锁定，重新部署或继续推进。</p>
+      </div>
+    </div>
+    <div class="pause-actions">
+      <button class="btn pause-primary" id="resumeBtn" type="button">继续游戏</button>
+      <button class="btn btn-secondary pause-secondary" id="pauseRestartBtn" type="button">重新开始</button>
+    </div>
+    <div class="pause-stage-select" aria-labelledby="pauseStageTitle">
+      <div class="pause-stage-head">
+        <div>
+          <div class="pause-stage-title" id="pauseStageTitle">关卡部署</div>
+          <div class="pause-stage-note" id="pauseStageNote">当前：第一关</div>
+        </div>
+        <span class="pause-stage-count">五区</span>
+      </div>
+      <div class="pause-stage-list" id="pauseStageList" role="group" aria-label="选择关卡"></div>
+      <button class="btn btn-stage" id="pauseStageStartBtn" type="button">从选中关卡开始</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/levels.js?v=10"></script>
+<script src="js/game.js?v=13"></script>
+</body>
+</html>
