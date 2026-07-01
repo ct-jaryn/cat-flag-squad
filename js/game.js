@@ -1352,7 +1352,9 @@
       const assetKey = key;
       if (assetsReady && imageReady(assets[assetKey])) {
         ctx.save();
-        ctx.translate(0, e.h / 2 - imgH / 2);
+        // boss5坦克履带应贴地，整体图片向下偏移让底部对齐 e.y + e.h
+        const yOffset = e.type === 'boss5' ? e.h - imgH : e.h / 2 - imgH / 2;
+        ctx.translate(0, yOffset);
         if (e.dir < 0) ctx.scale(-1, 1);
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(assets[assetKey], -imgW / 2, 0, imgW, imgH);
