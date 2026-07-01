@@ -736,19 +736,22 @@
     for (let i = 0; i < mv.count; i++) world.particles.push({ x: x + mv.offset, y, vx: sgnx * rand(mv.vx[0], mv.vx[1]), vy: sgny * rand(mv.vy[0], mv.vy[1]), life: mv.life, c: CONFIG.colors.particleMuzzle });
   }
 
-  function enemyShoot(e) {
+  function enemyShoot(e, opts) {
+    const o = opts || {};
     const dx = (player.x + player.w / 2) - (e.x + e.w / 2);
     const dy = (player.y + player.h / 2) - (e.y + e.h / 2);
+    const baseAng = o.angle != null ? o.angle : Math.atan2(dy, dx);
     const d = Math.hypot(dx, dy) || 1;
-    const sp = CONFIG.enemy.bulletSpeed[e.type] || CONFIG.enemy.bulletSpeed.default;
+    const sp = (o.speed != null ? o.speed : CONFIG.enemy.bulletSpeed[e.type]) || CONFIG.enemy.bulletSpeed.default;
     const centerFire = e.type === 'turret' || e.type === 'helicopter' || e.type === 'boss3' || e.type === 'boss4' || e.type === 'boss5' || e.type === 'mousetank' || e.type === 'flameguard';
     let bx = centerFire ? e.x + e.w / 2 : (e.dir > 0 ? e.x + e.w : e.x);
+    const by = o.spawnY != null ? e.y + o.spawnY : e.y + e.h * CONFIG.render.bullet.enemy.spawnY;
     const ebb = CONFIG.render.bullet.enemy;
     world.enemyBullets.push({
-      x: bx, y: e.y + e.h * ebb.spawnY, w: ebb.w, h: ebb.h,
-      vx: dx / d * sp, vy: dy / d * sp, life: CONFIG.timing.enemyBulletLife
+      x: bx, y: by, w: ebb.w, h: ebb.h,
+      vx: Math.cos(baseAng) * sp, vy: Math.sin(baseAng) * sp, life: o.life != null ? o.life : CONFIG.timing.enemyBulletLife
     });
-    audio.play('enemyShoot');
+    if (!o.silent) audio.play('enemyShoot');
   }
 
   // ---------- 更新 ----------
@@ -955,7 +958,7 @@
         // 只在镜头附近
         if (e.x > gameState.camX - CONFIG.enemy.activationRange.margin && e.x < gameState.camX + W + CONFIG.enemy.activationRange.margin) {
           const eCfg = ENEMY_TYPES[e.type] || ENEMY_TYPES.stand;
-          const nextCD = rand(...eCfg.fireCD) * enemyFireMult();
+          let nextCD = rand(...eCfg.fireCD) * enemyFireMult();
           if (e.type === 'flameguard') {
             // 火焰喷射：发射3发散射火焰弹
             const baseAng = Math.atan2(dyp, dxp);
@@ -967,6 +970,29 @@
                 x: e.x + e.w / 2, y: e.y + e.h * ebb.spawnY, w: ebb.w, h: ebb.h,
                 vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life: CONFIG.timing.enemyBulletLife * 0.7
               });
+            }
+            audio.play('enemyShoot');
+            e.fireCD = nextCD;
+          } else if (e.type === 'boss5') {
+            // 坦克王多阶段攻击：血量越低越凶猛
+            const hpRatio = e.hp / e.maxhp;
+            const baseAng = Math.atan2(dyp, dxp);
+            const centerX = e.x + e.w / 2;
+            const muzzleY = e.y + e.h * 0.35;
+            const fastSp = CONFIG.enemy.bulletSpeed.default * 1.1;
+            if (hpRatio > 0.6) {
+              // 阶段1：3发散射
+              for (let i = -1; i <= 1; i++) enemyShoot(e, { angle: baseAng + i * 0.15, speed: fastSp, spawnY: muzzleY - e.y });
+            } else if (hpRatio > 0.3) {
+              // 阶段2：5发散射 + 1发追踪
+              for (let i = -2; i <= 2; i++) enemyShoot(e, { angle: baseAng + i * 0.12, speed: fastSp, spawnY: muzzleY - e.y });
+              enemyShoot(e, { angle: baseAng, speed: CONFIG.enemy.bulletSpeed.default * 0.85, spawnY: muzzleY - e.y });
+            } else {
+              // 阶段3：扇形7发 + 上下两路齐射
+              for (let i = -3; i <= 3; i++) enemyShoot(e, { angle: baseAng + i * 0.12, speed: fastSp, spawnY: muzzleY - e.y });
+              enemyShoot(e, { angle: baseAng - 0.35, speed: fastSp, spawnY: muzzleY - e.y });
+              enemyShoot(e, { angle: baseAng + 0.35, speed: fastSp, spawnY: muzzleY - e.y });
+              nextCD *= 0.75;
             }
             audio.play('enemyShoot');
             e.fireCD = nextCD;

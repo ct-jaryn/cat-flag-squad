@@ -216,7 +216,7 @@ const LEVEL_DATA = {
       [3600, 'flameguard', 3500, 3800],
       [5400, 'flameguard', 5300, 5600],
     ],
-    boss: { x: -300, y: -90, yAbs: false, type: 'boss5', w: 90, h: 110, fireCD: 0.75, hpMult: 1.8 },
+    boss: { x: -300, y: -90, yAbs: false, type: 'boss5', w: 90, h: 110, fireCD: 0.55, hpMult: 3.0 },
     pickups: [
       [650, -170, 'rapid'],
       [1800, -240, 'spread'],
