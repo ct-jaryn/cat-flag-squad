@@ -533,15 +533,39 @@
       world.platforms.push({ x, y: GROUND_Y + yOff, w, h: CONFIG.world.platHeight, type: 'plat' });
     }
 
+    // 找到某x坐标下方最高实体平台/地面的顶部Y（用于避免敌人悬空）
+    function groundYAt(x, w) {
+      const cx = x + (w || 38) / 2;
+      let bestY = GROUND_Y;
+      for (const p of world.platforms) {
+        if (cx >= p.x && cx <= p.x + p.w && p.y < bestY) bestY = p.y;
+      }
+      return bestY;
+    }
+    // 把巡逻范围限制在当前站立的平台上，防止走出平台边缘掉落
+    function clampPatrolToGround(en) {
+      const cx = en.x + en.w / 2;
+      for (const p of world.platforms) {
+        if (cx >= p.x && cx <= p.x + p.w) {
+          en.patrolMin = Math.max(en.patrolMin == null ? p.x : en.patrolMin, p.x);
+          en.patrolMax = Math.min(en.patrolMax == null ? p.x + p.w : en.patrolMax, p.x + p.w - en.w);
+          return;
+        }
+      }
+    }
+
     // 普通敌人
     for (const e of data.infantry || []) {
-      const en = makeEnemy(e[0], GROUND_Y - CONFIG.enemy.spawnOffset.infantry, e[1]);
-      if (e[1] === 'patrol') { en.patrolMin = e[2]; en.patrolMax = e[3]; }
+      const type = e[1];
+      const gw = groundYAt(e[0], ENEMY_TYPES[type].w);
+      const en = makeEnemy(e[0], gw - CONFIG.enemy.spawnOffset.infantry, type);
+      if (type === 'patrol') { en.patrolMin = e[2]; en.patrolMax = e[3]; clampPatrolToGround(en); }
       world.enemies.push(en);
     }
     // 狙击手
     for (const [x, yOff] of data.snipers || []) {
-      world.enemies.push(makeEnemy(x, GROUND_Y + yOff, 'sniper'));
+      const gw = groundYAt(x, ENEMY_TYPES.sniper.w);
+      world.enemies.push(makeEnemy(x, gw - CONFIG.enemy.spawnOffset.platform.sniper, 'sniper'));
     }
     // 平台敌人
     for (const e of data.platformEnemies || []) {
@@ -549,7 +573,7 @@
       const off = CONFIG.enemy.spawnOffset.platform;
       const y = GROUND_Y + pyOff - (type === 'sniper' ? off.sniper : off.default);
       const en = makeEnemy(px, y, type);
-      if (type === 'patrol') { en.patrolMin = min; en.patrolMax = max; }
+      if (type === 'patrol') { en.patrolMin = min; en.patrolMax = max; clampPatrolToGround(en); }
       world.enemies.push(en);
     }
     // 关卡特色怪物
@@ -564,8 +588,10 @@
       } else {
         // [x, type, min, max] 地面巡逻类
         const [sx, type, min, max] = e;
-        const en = makeEnemy(sx, GROUND_Y - CONFIG.enemy.spawnOffset.infantry, type);
+        const gw = groundYAt(sx, ENEMY_TYPES[type].w);
+        const en = makeEnemy(sx, gw - CONFIG.enemy.spawnOffset.infantry, type);
         en.patrolMin = min; en.patrolMax = max;
+        clampPatrolToGround(en);
         world.enemies.push(en);
       }
     }
