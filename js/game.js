@@ -576,7 +576,7 @@
     const boss = makeEnemy(bx, by, data.boss.type);
     boss.w = data.boss.w; boss.h = data.boss.h;
     const bossHpMult = data.boss.hpMult || 1;
-    boss.hp = Math.max(1, Math.round(CONFIG.enemy.hp[data.boss.type] * statMult * bossHpMult));
+    boss.hp = Math.max(1, Math.round(boss.hp * bossHpMult));
     boss.maxhp = boss.hp;
     boss.fireCD = data.boss.fireCD * fireMult;
     if (data.boss.type === 'helicopter') {
@@ -928,6 +928,8 @@
       if (e.fireCD <= 0 && dist < CONFIG.enemy.activationRange.x && verticalOK) {
         // 只在镜头附近
         if (e.x > gameState.camX - CONFIG.enemy.activationRange.margin && e.x < gameState.camX + W + CONFIG.enemy.activationRange.margin) {
+          const eCfg = ENEMY_TYPES[e.type] || ENEMY_TYPES.stand;
+          const nextCD = rand(...eCfg.fireCD) * enemyFireMult();
           if (e.type === 'flameguard') {
             // 火焰喷射：发射3发散射火焰弹
             const baseAng = Math.atan2(dyp, dxp);
@@ -941,10 +943,10 @@
               });
             }
             audio.play('enemyShoot');
-            e.fireCD = rand(...CONFIG.enemy.fireCD[e.type]);
+            e.fireCD = nextCD;
           } else {
             enemyShoot(e);
-            e.fireCD = rand(...CONFIG.enemy.fireCD[e.type]);
+            e.fireCD = nextCD;
           }
         }
       }
