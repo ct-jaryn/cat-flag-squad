@@ -87,7 +87,7 @@
     hud: { progressBarY: 16, progressBarW: 200, progressBarH: 6, weaponBar: { x: 108, w: 38, h: 6 } },
     pickup: { w: 20, h: 20, score: 50, box: { x: 12, y: 34, w: 140, h: 22 } },
     render: {
-      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.8, h: 2.6 }, boss4: { w: 4.2, h: 4.2 }, boss5: { w: 3.6, h: 2.6 }, enemy1: { w: 1.6, h: 1.2 }, enemy2: { w: 1.4, h: 1.2 }, enemy3: { w: 1.3, h: 1.2 }, enemy4: { w: 1.4, h: 1.3 }, enemy5: { w: 1.5, h: 1.3 } },
+      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.8, h: 2.6 }, boss4: { w: 4.2, h: 4.2 }, boss5: { w: 3.6, h: 2.6 }, enemy1: { w: 1.5, h: 1.2 }, enemy2: { w: 1.4, h: 1.2 }, enemy3: { w: 1.45, h: 1.2 }, enemy4: { w: 1.4, h: 1.2 }, enemy5: { w: 1.45, h: 1.2 } },
       bladeAmplitude: 60,
       offscreenMargin: 40,
       trailFactor: { player: 0.02, enemy: 0.012 },
@@ -592,19 +592,19 @@
   }
 
   const ENEMY_TYPES = {
-    stand:      { w: 30, h: 40, hpBase: 1,       speed: 0,   fireCD: CONFIG.enemy.fireCD.stand },
-    patrol:     { w: 30, h: 40, hpBase: 1,       speed: -40, fireCD: CONFIG.enemy.fireCD.patrol },
-    sniper:     { w: 28, h: 38, hpKey: 'sniper',  speed: 0,   fireCD: CONFIG.enemy.fireCD.sniper },
+    stand:      { w: 38, h: 42, hpBase: 1,       speed: 0,   fireCD: CONFIG.enemy.fireCD.stand },
+    patrol:     { w: 38, h: 42, hpBase: 1,       speed: -40, fireCD: CONFIG.enemy.fireCD.patrol },
+    sniper:     { w: 38, h: 42, hpKey: 'sniper',  speed: 0,   fireCD: CONFIG.enemy.fireCD.sniper },
     turret:     { w: 30, h: 40, hpKey: 'turret',  speed: 0,   fireCD: CONFIG.enemy.fireCD.turret },
     helicopter: { w: 30, h: 40, hpKey: 'helicopter', speed: 0, fireCD: CONFIG.enemy.fireCD.helicopter },
     boss3:      { w: 80, h: 100, hpKey: 'turret', speed: 0, fireCD: CONFIG.enemy.fireCD.turret },
     boss4:      { w: 170, h: 100, hpKey: 'helicopter', speed: 0, fireCD: CONFIG.enemy.fireCD.helicopter },
     boss5:      { w: 90, h: 110, hpKey: 'turret', speed: 0, fireCD: CONFIG.enemy.fireCD.turret },
-    mousetank:  { w: 50, h: 40, hpBase: 4,       speed: -25, fireCD: CONFIG.enemy.fireCD.patrol },
-    paratrooper:{ w: 36, h: 44, hpBase: 2,       speed: 0,   fireCD: CONFIG.enemy.fireCD.stand },
-    rat:        { w: 60, h: 36, hpBase: 3,       speed: -90, fireCD: CONFIG.enemy.fireCD.patrol },
-    skyknight:  { w: 40, h: 44, hpBase: 3,       speed: 0,   fireCD: CONFIG.enemy.fireCD.sniper },
-    flameguard: { w: 46, h: 48, hpBase: 5,       speed: -30, fireCD: CONFIG.enemy.fireCD.stand }
+    mousetank:  { w: 38, h: 42, hpBase: 4,       speed: -25, fireCD: CONFIG.enemy.fireCD.patrol },
+    paratrooper:{ w: 38, h: 42, hpBase: 2,       speed: 0,   fireCD: CONFIG.enemy.fireCD.stand },
+    rat:        { w: 38, h: 42, hpBase: 3,       speed: -90, fireCD: CONFIG.enemy.fireCD.patrol },
+    skyknight:  { w: 38, h: 42, hpBase: 3,       speed: 0,   fireCD: CONFIG.enemy.fireCD.sniper },
+    flameguard: { w: 38, h: 42, hpBase: 5,       speed: -30, fireCD: CONFIG.enemy.fireCD.stand }
   };
 
   function makeEnemy(x, y, type) {
