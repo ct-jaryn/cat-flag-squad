@@ -158,6 +158,9 @@
 
 # Compressed files
 *.zip
+
+# Game source art archives
+assets/archive/
 *.rar
 *.7z
 *.tar

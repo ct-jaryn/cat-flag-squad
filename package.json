@@ -1,0 +1,12 @@
+{
+  "name": "cat-flag-squad",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "check": "node --check js/assets-manifest.js && node --check js/asset-loader.js && node --check js/level-schema.js && node --check js/input-controller.js && node --check js/levels.js && node --check js/game.js && node --check scripts/smoke-runtime.mjs && node scripts/validate-project.mjs && node scripts/smoke-runtime.mjs",
+    "validate": "node scripts/validate-project.mjs",
+    "test": "npm run check",
+    "serve": "python3 -m http.server 4173"
+  }
+}

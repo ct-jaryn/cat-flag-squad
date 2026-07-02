@@ -19,9 +19,9 @@ const LEVEL_DATA = {
     ],
     specialEnemies: [
       // [x, 类型, 巡逻min, 巡逻max]
-      [1100, 'mousetank', 1000, 1300],
-      [2450, 'mousetank', 2350, 2600],
-      [3700, 'mousetank', 3600, 3850],
+      [1080, 'mousetank', 980, 1130],
+      [2250, 'mousetank', 2180, 2330],
+      [3580, 'mousetank', 3500, 3630],
       [5600, 'mousetank', 5500, 5750],
     ],
     snipers: [

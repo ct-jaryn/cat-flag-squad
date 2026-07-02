@@ -67,6 +67,7 @@
         helicopter: [0.7, 1.2]
       },
       hp: { sniper: 2, turret: 14, helicopter: 30 },
+      hpMultiplier: { regular: 2, boss: 5 },
       score: { infantry: 100, sniper: 200, turret: 1000, helicopter: 2000, boss3: 2200, boss4: 2600, boss5: 4000, stageClear: 1000 },
       activationRange: { x: 520, y: { default: 220, helicopter: 360 }, margin: 60 },
       warningTime: { default: 0.35, boss: 0.55 }
@@ -95,7 +96,21 @@
     pickup: { w: 20, h: 20, score: 50, box: { x: 12, y: 34, w: 158, h: 22 } },
     render: {
       background: { seamOverlap: 1 },
-      imageScale: { turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 }, boss3: { w: 3.8, h: 2.6 }, boss4: { w: 3.0, h: 2.2 }, boss5: { w: 3.6, h: 2.6 }, infantry: { w: 1.55, h: 1.35 }, sniper: { w: 1.75, h: 1.35 }, enemy1: { w: 1.55, h: 1.25 }, enemy2: { w: 1.45, h: 1.35 }, enemy3: { w: 1.5, h: 1.25 }, enemy4: { w: 1.5, h: 1.35 }, enemy5: { w: 1.5, h: 1.25 } },
+      imageScale: {
+        turret: { w: 3.5, h: 2.6 }, helicopter: { w: 5, h: 5.2 },
+        boss3: { w: 3.8, h: 2.6 }, boss4: { w: 3.0, h: 2.2 }, boss5: { w: 3.6, h: 2.6 },
+        infantry: { w: 1.58, h: 1.38 }, sniper: { w: 1.76, h: 1.38 },
+        enemy1: { w: 1.82, h: 1.5 }, enemy2: { w: 1.72, h: 1.56 },
+        enemy3: { w: 1.82, h: 1.52 }, enemy4: { w: 1.76, h: 1.58 }, enemy5: { w: 1.86, h: 1.56 }
+      },
+      spriteAnim: {
+        infantry: { asset: 'infantryWalk', frames: 6, fps: 8 },
+        enemy1: { asset: 'enemy1Walk', frames: 6, fps: 8 },
+        enemy2: { asset: 'enemy2Hover', frames: 6, fps: 7 },
+        enemy3: { asset: 'enemy3Walk', frames: 6, fps: 9 },
+        enemy4: { asset: 'enemy4Hover', frames: 6, fps: 8 },
+        enemy5: { asset: 'enemy5Walk', frames: 6, fps: 7 }
+      },
       bladeAmplitude: 60,
       offscreenMargin: 40,
       trailFactor: { player: 0.02, enemy: 0.012 },
@@ -218,6 +233,14 @@
     fb.helicopter.bladeMount.color = CONFIG.colors.heliBladeMountFallback;
   })();
 
+  const ELITE_ENEMY_ASSETS = {
+    mousetank: 'enemy1',
+    paratrooper: 'enemy2',
+    rat: 'enemy3',
+    skyknight: 'enemy4',
+    flameguard: 'enemy5'
+  };
+
   const overlay = document.getElementById('overlay');
   const menuCard = overlay.querySelector('.card');
   let endCard = null;
@@ -268,102 +291,32 @@
   helpBackdrop.onclick = () => showHelp(false);
 
   // ---------- 输入 ----------
-  const input = {
-    keys: {},
-    mouse: { x: 0, y: 0, down: false },
-    touch: { left: false, right: false, up: false, down: false, jump: false, fire: false },
-    jumpBuffer: 0,
-    coyoteTime: 0,
-    jumpHeld: false
-  };
-
-  window.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && helpPanel.classList.contains('show')) {
-      showHelp(false);
-      e.preventDefault();
-      return;
-    }
-    if (e.key === 'Enter' && !gameState.running && overlay.style.display !== 'none' && menuCard && !menuCard.hidden && !startBtn.disabled && document.activeElement === document.body) {
-      startBtn.click();
-      e.preventDefault();
-      return;
-    }
-    input.keys[e.key.toLowerCase()] = true;
-    if ((e.key === ' ' || e.key === 'ArrowUp') && !input.jumpHeld) {
-      input.jumpHeld = true;
-      input.jumpBuffer = CONFIG.input.jumpBuffer;
-    }
-    if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
-    if ((e.key === 'Escape' || e.key.toLowerCase() === 'p') && gameState.running && !gameState.gameOver && !gameState.win) {
-      togglePause();
-    }
+  const inputController = window.CAT_FLAG_INPUT_CONTROLLER.createInputController({
+    window,
+    document,
+    canvas,
+    canvasWidth: W,
+    canvasHeight: H,
+    jumpBufferSeconds: CONFIG.input.jumpBuffer,
+    isHelpOpen: () => helpPanel.classList.contains('show'),
+    closeHelp: () => showHelp(false),
+    shouldStartFromEnter: () => !gameState.running && overlay.style.display !== 'none' && menuCard && !menuCard.hidden && !startBtn.disabled && document.activeElement === document.body,
+    startFromEnter: () => startBtn.click(),
+    shouldTogglePause: () => gameState.running && !gameState.gameOver && !gameState.win,
+    togglePause: () => togglePause(),
+    shouldAutoPauseOnBlur: () => gameState.running && !gameState.gameOver && !gameState.win && !gameState.paused,
+    resumeAudio: () => audio.resume()
   });
-  window.addEventListener('keyup', e => {
-    input.keys[e.key.toLowerCase()] = false;
-    if (e.key === ' ' || e.key === 'ArrowUp') input.jumpHeld = false;
-  });
-
-  canvas.addEventListener('mousemove', e => {
-    const r = canvas.getBoundingClientRect();
-    input.mouse.x = (e.clientX - r.left) * (W / r.width);
-    input.mouse.y = (e.clientY - r.top) * (H / r.height);
-  });
-  canvas.addEventListener('mousedown', () => { input.mouse.down = true; });
-  window.addEventListener('mouseup', () => { input.mouse.down = false; });
-  canvas.addEventListener('contextmenu', e => e.preventDefault());
-
-  // 移动端可视化虚拟按键
-  const mobileControls = document.getElementById('mobileControls');
-  const btnLeft = document.getElementById('btnLeft');
-  const btnRight = document.getElementById('btnRight');
-  const btnUp = document.getElementById('btnUp');
-  const btnDown = document.getElementById('btnDown');
-  const btnJump = document.getElementById('btnJump');
-  const btnFire = document.getElementById('btnFire');
-  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-    mobileControls.classList.add('show');
-  }
-  function setMobileControlsActive(active) {
-    mobileControls.classList.toggle('active', active && mobileControls.classList.contains('show'));
-  }
-  function bindMobileButton(btn, stateKey, opts = {}) {
-    const set = (active) => {
-      input.touch[stateKey] = active;
-      btn.classList.toggle('active', active);
-      if (active && opts.jump) input.jumpBuffer = CONFIG.input.jumpBuffer;
-    };
-    btn.addEventListener('touchstart', (e) => { e.preventDefault(); set(true); if (opts.fire) input.mouse.down = true; audio.resume(); }, { passive: false });
-    btn.addEventListener('touchend', (e) => { e.preventDefault(); set(false); if (opts.fire && !input.touch.fire) input.mouse.down = false; }, { passive: false });
-    btn.addEventListener('touchcancel', (e) => { e.preventDefault(); set(false); if (opts.fire) input.mouse.down = false; }, { passive: false });
-    btn.addEventListener('mousedown', (e) => { e.preventDefault(); set(true); if (opts.fire) input.mouse.down = true; });
-    btn.addEventListener('mouseup', (e) => { e.preventDefault(); set(false); if (opts.fire) input.mouse.down = false; });
-    btn.addEventListener('mouseleave', () => { set(false); if (opts.fire) input.mouse.down = false; });
-  }
-  bindMobileButton(btnLeft, 'left');
-  bindMobileButton(btnRight, 'right');
-  bindMobileButton(btnUp, 'up');
-  bindMobileButton(btnDown, 'down');
-  bindMobileButton(btnJump, 'jump', { jump: true });
-  bindMobileButton(btnFire, 'fire', { fire: true });
-
-  // 窗口失焦时清空输入并自动暂停
-  window.addEventListener('blur', () => {
-    input.keys = {};
-    input.mouse.down = false;
-    input.touch.left = input.touch.right = input.touch.up = input.touch.down = input.touch.jump = input.touch.fire = false;
-    input.jumpBuffer = 0;
-    input.coyoteTime = 0;
-    input.jumpHeld = false;
-    if (gameState.running && !gameState.gameOver && !gameState.win && !gameState.paused) togglePause();
-  });
-  window.addEventListener('mouseleave', () => { input.mouse.down = false; });
+  const input = inputController.input;
+  const resetInput = inputController.reset;
+  const setMobileControlsActive = inputController.setMobileControlsActive;
 
   // ---------- 工具 ----------
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const aabb = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   const bulletHitPlatform = b => false; // 子弹可穿透平台等所有障碍物
-  const imageReady = img => img.complete && img.naturalWidth > 0;
+  const imageReady = img => !!img && img.complete && img.naturalWidth > 0;
   const enemyDirToPlayer = e => (player.x + player.w / 2) < (e.x + e.w / 2) ? -1 : 1;
 
   // ---------- Web Audio 合成音效 ----------
@@ -490,64 +443,10 @@
   }
 
   // ---------- 资源 ----------
-  const assets = {
-    bg: new Image(),
-    hero: new Image(),
-    boss: new Image(),
-    skyBg: new Image(),
-    heliBoss: new Image(),
-    boss3: new Image(),
-    boss4: new Image(),
-    boss5: new Image(),
-    bg3: new Image(),
-    bg4: new Image(),
-    bg5: new Image(),
-    infantry: new Image(),
-    enemy1: new Image(),
-    enemy2: new Image(),
-    enemy3: new Image(),
-    enemy4: new Image(),
-    enemy5: new Image()
-  };
-  const assetMeta = [
-    { key: 'bg', src: 'assets/cat_bg.jpg?v=4', required: true },
-    { key: 'hero', src: 'assets/cat_hero_sheet.png?v=3', required: true },
-    { key: 'boss', src: 'assets/cat_boss.png?v=3', required: false },
-    { key: 'skyBg', src: 'assets/sky_bg.jpg?v=4', required: false },
-    { key: 'heliBoss', src: 'assets/heli_boss.png?v=3', required: false },
-    { key: 'boss3', src: 'assets/boss3_mech.png?v=2', required: false },
-    { key: 'boss4', src: 'assets/boss4_airship.png?v=2', required: false },
-    { key: 'boss5', src: 'assets/boss5_tank.png?v=2', required: false },
-    { key: 'bg3', src: 'assets/bg3_city.jpg?v=2', required: false },
-    { key: 'bg4', src: 'assets/bg4_fortress.jpg?v=2', required: false },
-    { key: 'bg5', src: 'assets/bg5_lava.jpg?v=2', required: false },
-    { key: 'infantry', src: 'assets/enemy_infantry.png?v=1', required: false },
-    { key: 'enemy1', src: 'assets/enemy1_mousetank.png?v=2', required: false },
-    { key: 'enemy2', src: 'assets/enemy2_paratrooper.png?v=2', required: false },
-    { key: 'enemy3', src: 'assets/enemy3_rat.png?v=2', required: false },
-    { key: 'enemy4', src: 'assets/enemy4_skyknight.png?v=2', required: false },
-    { key: 'enemy5', src: 'assets/enemy5_flameguard.png?v=2', required: false },
-  ];
-  function loadAssets(onProgress, cb) {
-    let loaded = 0, errors = 0, requiredDone = 0;
-    const total = assetMeta.length;
-    const requiredTotal = assetMeta.filter(m => m.required).length;
-    let readyNotified = false;
-    const onDone = () => {
-      if (onProgress) onProgress(requiredTotal === 0 ? 1 : requiredDone / requiredTotal);
-      if (!readyNotified && requiredDone >= requiredTotal) {
-        readyNotified = true;
-        if (cb) cb();
-      }
-      if (loaded + errors === total && errors > 0) console.warn('[喵喵突击队] 资源加载完成，' + errors + '/' + total + ' 个失败');
-    };
-    for (const meta of assetMeta) {
-      const img = assets[meta.key];
-      img.onload = () => { loaded++; if (meta.required) requiredDone++; onDone(); };
-      img.onerror = () => { errors++; if (meta.required) requiredDone++; onDone(); };
-      img.src = meta.src;
-    }
-  }
+  const assetLoader = window.CAT_FLAG_ASSET_LOADER;
+  const assetStore = assetLoader.createAssetStore(window.CAT_FLAG_ASSET_MANIFEST);
+  const assets = assetStore.assets;
+  const loadAssets = assetStore.loadAssets;
 
   // ---------- 世界 ----------
   const GROUND_Y = CONFIG.world.groundY;
@@ -583,6 +482,18 @@
   const LEVEL_IDS = Object.keys(LEVELS).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
   const FIRST_STAGE = LEVEL_IDS[0] || 1;
   const LAST_STAGE = LEVEL_IDS[LEVEL_IDS.length - 1] || 1;
+  const LEVEL_SCHEMA = window.CAT_FLAG_LEVEL_SCHEMA || {};
+  const {
+    normalizeGroundSegment,
+    normalizeFloat,
+    normalizeInfantry,
+    normalizeSniper,
+    normalizePlatformEnemy,
+    normalizeSpecialEnemy,
+    normalizePickup,
+    normalizeBoss,
+    collectEnemies
+  } = LEVEL_SCHEMA;
   const STAGE_NUMERALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
   const BOSS_NAMES = {
     turret: '钢铁炮台',
@@ -606,41 +517,6 @@
     return LEVEL_IDS[idx + 1] || current;
   }
 
-  function normalizeGroundSegment(item) {
-    return Array.isArray(item) ? { x: item[0], end: item[1] } : { x: item.x ?? item.start, end: item.end };
-  }
-  function normalizeFloat(item) {
-    return Array.isArray(item)
-      ? { x: item[0], yOffset: item[1], w: item[2] }
-      : { x: item.x, yOffset: item.yOffset ?? item.y, w: item.w ?? item.width };
-  }
-  function normalizeInfantry(item) {
-    return Array.isArray(item)
-      ? { x: item[0], type: item[1], patrolMin: item[2], patrolMax: item[3] }
-      : { x: item.x, type: item.type, patrolMin: item.patrolMin, patrolMax: item.patrolMax };
-  }
-  function normalizeSniper(item) {
-    return Array.isArray(item) ? { x: item[0], yOffset: item[1] } : { x: item.x, yOffset: item.yOffset ?? item.y };
-  }
-  function normalizePlatformEnemy(item) {
-    return Array.isArray(item)
-      ? { x: item[0], yOffset: item[1], type: item[2], patrolMin: item[3], patrolMax: item[4] }
-      : { x: item.x, yOffset: item.yOffset ?? item.y, type: item.type, patrolMin: item.patrolMin, patrolMax: item.patrolMax };
-  }
-  function normalizeSpecialEnemy(item) {
-    if (!Array.isArray(item)) return item;
-    if (item.length === 5) {
-      return { x: item[0], yAbs: item[1], centerY: item[2], radius: item[3], type: item[4], movement: 'orbit' };
-    }
-    return { x: item[0], type: item[1], patrolMin: item[2], patrolMax: item[3], movement: 'patrol' };
-  }
-  function normalizePickup(item) {
-    return Array.isArray(item) ? { x: item[0], yOffset: item[1], type: item[2] } : { x: item.x, yOffset: item.yOffset ?? item.y, type: item.type };
-  }
-  function normalizeBoss(item) {
-    return item || null;
-  }
-
   function validateLevelData() {
     const warnings = [];
     for (const stage of LEVEL_IDS) {
@@ -656,12 +532,7 @@
         warnings.push(`第${stage}关飞行 Boss 缺少 centerY/radius: ${boss.type}`);
       }
 
-      const enemyGroups = [
-        ...(data.infantry || []).map(normalizeInfantry),
-        ...(data.platformEnemies || []).map(normalizePlatformEnemy),
-        ...(data.specialEnemies || []).map(normalizeSpecialEnemy),
-        ...(data.snipers || []).map(e => ({ ...normalizeSniper(e), type: 'sniper' }))
-      ];
+      const enemyGroups = collectEnemies(data);
       for (const enemy of enemyGroups) {
         if (!ENEMY_TYPES[enemy.type]) warnings.push(`第${stage}关敌人类型未知: ${enemy.type}`);
         if (enemy.movement === 'patrol' || ENEMY_TYPES[enemy.type]?.movement === 'patrol') {
@@ -696,33 +567,14 @@
       world.platforms.push({ x: p.x, y: GROUND_Y + p.yOffset, w: p.w, h: CONFIG.world.platHeight, type: 'plat' });
     }
 
-    // 找到某x坐标下方最高实体平台/地面的顶部Y（用于避免敌人悬空）
-    function groundYAt(x, w) {
-      const cx = x + (w || 38) / 2;
-      let bestY = GROUND_Y;
-      for (const p of world.platforms) {
-        if (cx >= p.x && cx <= p.x + p.w && p.y < bestY) bestY = p.y;
-      }
-      return bestY;
-    }
-    // 把巡逻范围限制在当前站立的平台上，防止走出平台边缘掉落
-    function clampPatrolToGround(en) {
-      const cx = en.x + en.w / 2;
-      for (const p of world.platforms) {
-        if (cx >= p.x && cx <= p.x + p.w) {
-          en.patrolMin = Math.max(en.patrolMin == null ? p.x : en.patrolMin, p.x);
-          en.patrolMax = Math.min(en.patrolMax == null ? p.x + p.w : en.patrolMax, p.x + p.w - en.w);
-          return;
-        }
-      }
-    }
-
     // 普通敌人
     for (const item of data.infantry || []) {
       const e = normalizeInfantry(item);
       const type = e.type;
       const gw = groundYAt(e.x, enemyConfig(type).w);
-      const en = makeEnemy(e.x, gw - CONFIG.enemy.spawnOffset.infantry, type);
+      const cfg = enemyConfig(type);
+      const y = cfg.groundLocked ? gw - cfg.h : gw - CONFIG.enemy.spawnOffset.infantry;
+      const en = makeEnemy(e.x, y, type);
       if (enemyMovement(en) === 'patrol') { en.patrolMin = e.patrolMin; en.patrolMax = e.patrolMax; clampPatrolToGround(en); }
       world.enemies.push(en);
     }
@@ -751,8 +603,10 @@
         en.phase = 0; en.centerX = e.x; en.centerY = centerY; en.radius = e.radius || 0;
         world.enemies.push(en);
       } else {
-        const gw = groundYAt(e.x, enemyConfig(e.type).w);
-        const en = makeEnemy(e.x, gw - CONFIG.enemy.spawnOffset.infantry, e.type);
+        const cfg = enemyConfig(e.type);
+        const gw = groundYAt(e.x, cfg.w);
+        const y = cfg.groundLocked ? gw - cfg.h : gw - CONFIG.enemy.spawnOffset.infantry;
+        const en = makeEnemy(e.x, y, e.type);
         en.patrolMin = e.patrolMin; en.patrolMax = e.patrolMax;
         clampPatrolToGround(en);
         world.enemies.push(en);
@@ -764,7 +618,7 @@
     if (!bossData) return;
     const bx = bossData.x < 0 ? WORLD_LEN + bossData.x : bossData.x;
     const by = bossData.yAbs ? bossData.y : GROUND_Y + bossData.y;
-    const boss = makeEnemy(bx, by, bossData.type);
+    const boss = makeEnemy(bx, by, bossData.type, { hpMultiplier: CONFIG.enemy.hpMultiplier.boss });
     boss.isBoss = true;
     boss.w = bossData.w ?? boss.w;
     boss.h = bossData.h ?? boss.h;
@@ -795,11 +649,11 @@
     boss3:      { w: 80, h: 100, hpKey: 'turret', speed: 0, fireCD: CONFIG.enemy.fireCD.turret, movement: 'groundLocked', attack: 'single', boss: true, score: CONFIG.enemy.score.boss3, centerFire: true, assetFacing: -1, hurtBoxScale: { w: 2.8, h: 2.0 } },
     boss4:      { w: 170, h: 100, hpKey: 'helicopter', speed: 0, fireCD: CONFIG.enemy.fireCD.helicopter, movement: 'orbit', attack: 'single', boss: true, score: CONFIG.enemy.score.boss4, centerFire: true, assetFacing: -1, hurtBoxScale: { w: 2.4, h: 1.8 } },
     boss5:      { w: 90, h: 110, hpKey: 'turret', speed: 0, fireCD: CONFIG.enemy.fireCD.turret, movement: 'groundLocked', attack: 'boss5Phase', boss: true, score: CONFIG.enemy.score.boss5, centerFire: true, assetFacing: 1, hurtBoxScale: { w: 2.8, h: 2.2 } },
-    mousetank:  { w: 38, h: 42, hpBase: 4,       speed: -25, fireCD: CONFIG.enemy.fireCD.patrol, movement: 'patrol', groundLocked: true, attack: 'single', score: 180, centerFire: true, hurtBoxScale: { w: 1.25, h: 1.1 } },
-    paratrooper:{ w: 38, h: 42, hpBase: 2,       speed: 0,   fireCD: CONFIG.enemy.fireCD.stand, movement: 'orbit', attack: 'single', score: 150, hurtBoxScale: { w: 1.2, h: 1.15 } },
-    rat:        { w: 38, h: 42, hpBase: 3,       speed: -90, fireCD: CONFIG.enemy.fireCD.patrol, movement: 'patrol', groundLocked: true, attack: 'single', score: 160, hurtBoxScale: { w: 1.25, h: 1.1 } },
-    skyknight:  { w: 38, h: 42, hpBase: 3,       speed: 0,   fireCD: CONFIG.enemy.fireCD.sniper, movement: 'orbit', attack: 'single', score: 220, hurtBoxScale: { w: 1.25, h: 1.15 } },
-    flameguard: { w: 38, h: 42, hpBase: 5,       speed: -30, fireCD: CONFIG.enemy.fireCD.stand, movement: 'patrol', groundLocked: true, attack: 'flameSpread', score: 260, centerFire: true, hurtBoxScale: { w: 1.25, h: 1.1 } }
+    mousetank:  { w: 66, h: 72, hpBase: 4,       speed: -25, fireCD: CONFIG.enemy.fireCD.patrol, movement: 'patrol', groundLocked: true, attack: 'single', score: 180, centerFire: true, hurtBoxScale: { w: 1.62, h: 1.32 } },
+    paratrooper:{ w: 54, h: 58, hpBase: 2,       speed: 0,   fireCD: CONFIG.enemy.fireCD.stand, movement: 'orbit', attack: 'single', score: 150, hurtBoxScale: { w: 1.18, h: 1.12 } },
+    rat:        { w: 58, h: 56, hpBase: 3,       speed: -90, fireCD: CONFIG.enemy.fireCD.patrol, movement: 'patrol', groundLocked: true, attack: 'single', score: 160, hurtBoxScale: { w: 1.24, h: 1.12 } },
+    skyknight:  { w: 56, h: 62, hpBase: 3,       speed: 0,   fireCD: CONFIG.enemy.fireCD.sniper, movement: 'orbit', attack: 'single', score: 220, hurtBoxScale: { w: 1.2, h: 1.15 } },
+    flameguard: { w: 60, h: 70, hpBase: 5,       speed: -30, fireCD: CONFIG.enemy.fireCD.stand, movement: 'patrol', groundLocked: true, attack: 'flameSpread', score: 260, centerFire: true, hurtBoxScale: { w: 1.22, h: 1.12 } }
   };
 
   function enemyConfig(type) {
@@ -808,6 +662,24 @@
   function enemyMovement(enemyOrType) {
     const type = typeof enemyOrType === 'string' ? enemyOrType : enemyOrType.type;
     return enemyConfig(type).movement || 'static';
+  }
+  function groundYAt(x, w) {
+    const cx = x + (w || 38) / 2;
+    let bestY = GROUND_Y;
+    for (const p of world.platforms) {
+      if (cx >= p.x && cx <= p.x + p.w && p.y < bestY) bestY = p.y;
+    }
+    return bestY;
+  }
+  function clampPatrolToGround(en) {
+    const cx = en.x + en.w / 2;
+    for (const p of world.platforms) {
+      if (cx >= p.x && cx <= p.x + p.w) {
+        en.patrolMin = Math.max(en.patrolMin == null ? p.x : en.patrolMin, p.x);
+        en.patrolMax = Math.min(en.patrolMax == null ? p.x + p.w : en.patrolMax, p.x + p.w - en.w);
+        return;
+      }
+    }
   }
   function enemyAttack(enemyOrType) {
     const type = typeof enemyOrType === 'string' ? enemyOrType : enemyOrType.type;
@@ -938,12 +810,13 @@
   }
   validateLevelData();
 
-  function makeEnemy(x, y, type) {
+  function makeEnemy(x, y, type, opts = {}) {
     const statMult = enemyStatMult();
     const fireMult = enemyFireMult();
     const cfg = enemyConfig(type);
     const hpBase = cfg.hpKey ? CONFIG.enemy.hp[cfg.hpKey] : cfg.hpBase;
-    const hp = Math.max(1, Math.round(hpBase * statMult));
+    const hpMultiplier = opts.hpMultiplier ?? CONFIG.enemy.hpMultiplier.regular;
+    const hp = Math.max(1, Math.round(hpBase * statMult * hpMultiplier));
     const base = {
       x, y, w: cfg.w, h: cfg.h, vx: 0, vy: 0, type, dir: -1,
       fireCD: rand(...cfg.fireCD) * fireMult, hp, maxhp: hp,
@@ -1062,6 +935,180 @@
       vx: Math.cos(baseAng) * sp, vy: Math.sin(baseAng) * sp, life: o.life != null ? o.life : CONFIG.timing.enemyBulletLife
     });
     if (!o.silent) audio.play('enemyShoot');
+  }
+
+  function updateEnemyBehavior(dt) {
+    for (const e of world.enemies) {
+      if (e.dead) continue;
+      e.anim += dt;
+      e.fireCD -= dt;
+      e.dir = enemyDirToPlayer(e);
+      const movement = enemyMovement(e);
+      if (movement === 'patrol') {
+        e.x += e.vx * dt;
+        if (e.x < e.patrolMin) { e.x = e.patrolMin; e.vx = Math.abs(e.vx); }
+        if (e.x > e.patrolMax) { e.x = e.patrolMax; e.vx = -Math.abs(e.vx); }
+      }
+      if (movement === 'orbit') {
+        e.phase += dt * CONFIG.enemy.helicopterPhaseSpeed;
+        e.x = e.centerX + Math.cos(e.phase) * e.radius;
+        e.y = e.centerY + Math.sin(e.phase * CONFIG.enemy.helicopterYPhaseMult) * CONFIG.enemy.helicopterAmplitude;
+        e.dir = enemyDirToPlayer(e);
+      }
+      if (movement === 'groundLocked' || enemyConfig(e.type).groundLocked) e.y = groundYAt(e.x, e.w) - e.h;
+
+      const fireInfo = enemyPlayerFireInfo(e);
+      if (e.fireCD > 0 || !fireInfo.active) continue;
+
+      const eCfg = enemyConfig(e.type);
+      let nextCD = rand(...eCfg.fireCD) * enemyFireMult();
+      const attack = enemyAttack(e);
+      if (attack === 'flameSpread') {
+        const baseAng = fireInfo.baseAng;
+        for (let i = -1; i <= 1; i++) {
+          const ang = baseAng + i * 0.18;
+          const sp = CONFIG.enemy.bulletSpeed.default * 0.7;
+          const ebb = CONFIG.render.bullet.enemy;
+          world.enemyBullets.push({
+            x: e.x + e.w / 2, y: e.y + e.h * ebb.spawnY, w: ebb.w, h: ebb.h,
+            vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life: CONFIG.timing.enemyBulletLife * 0.7
+          });
+        }
+        audio.play('enemyShoot');
+        e.fireCD = nextCD;
+      } else if (attack === 'boss5Phase') {
+        const hpRatio = e.hp / e.maxhp;
+        const baseAng = fireInfo.baseAng;
+        const muzzleY = e.y + e.h * 0.35;
+        const fastSp = CONFIG.enemy.bulletSpeed.default * 1.1;
+        if (hpRatio > 0.6) {
+          for (let i = -1; i <= 1; i++) enemyShoot(e, { angle: baseAng + i * 0.15, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
+        } else if (hpRatio > 0.3) {
+          for (let i = -2; i <= 2; i++) enemyShoot(e, { angle: baseAng + i * 0.12, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
+          enemyShoot(e, { angle: baseAng, speed: CONFIG.enemy.bulletSpeed.default * 0.85, spawnY: muzzleY - e.y, silent: true });
+        } else {
+          for (let i = -3; i <= 3; i++) enemyShoot(e, { angle: baseAng + i * 0.12, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
+          enemyShoot(e, { angle: baseAng - 0.35, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
+          enemyShoot(e, { angle: baseAng + 0.35, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
+          nextCD *= 0.75;
+        }
+        audio.play('enemyShoot');
+        e.fireCD = nextCD;
+      } else {
+        enemyShoot(e);
+        e.fireCD = nextCD;
+      }
+    }
+  }
+
+  function damageEnemyWithPlayerBullet(e, b) {
+    b.life = 0;
+    gameState.stats.hits++;
+    e.hp -= 1;
+    audio.play('hit');
+    const hit = CONFIG.particles.hit;
+    for (let i = 0; i < hit.count; i++) {
+      world.particles.push({ x: b.x, y: b.y, vx: rand(hit.vx[0], hit.vx[1]), vy: rand(hit.vy[0], hit.vy[1]), life: hit.life, c: CONFIG.colors.particleHit });
+    }
+    if (e.hp <= 0) defeatEnemy(e);
+    else gameState.shake = CONFIG.shake.enemyHit;
+  }
+
+  function defeatEnemy(e) {
+    e.dead = true;
+    gameState.stats.kills++;
+    gameState.score += enemyScore(e);
+    if (isBossEnemy(e)) {
+      gameState.stats.bosses++;
+      if (nextStageAfter(gameState.stage) !== gameState.stage) {
+        gameState.score += CONFIG.enemy.score.stageClear;
+        gameState.stageTimeout = setTimeout(() => startNextStage(), CONFIG.enemy.bossDeathDelay);
+      } else {
+        gameState.win = true;
+        endGame(true);
+      }
+    }
+
+    audio.play('explosion');
+    const boom = CONFIG.particles.boom;
+    const boomCount = enemyBoomCount(e);
+    for (let i = 0; i < boomCount; i++) {
+      world.particles.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: rand(boom.vx[0], boom.vx[1]), vy: rand(boom.vy[0], boom.vy[1]), life: rand(boom.life[0], boom.life[1]), c: i % 2 ? CONFIG.colors.particleBoomA : CONFIG.colors.particleBoomB });
+    }
+    gameState.shake = enemyShake(e);
+  }
+
+  function updatePlayerBullets(dt) {
+    const enemyGrid = buildEnemySpatialGrid(world.enemies);
+    for (const b of world.bullets) {
+      b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
+      if (bulletHitPlatform(b)) { b.life = 0; continue; }
+      for (const e of getEnemiesNear(enemyGrid, b.x)) {
+        if (e.dead) continue;
+        if (aabb(b, enemyHurtBox(e))) {
+          damageEnemyWithPlayerBullet(e, b);
+          break;
+        }
+      }
+    }
+    const mr = CONFIG.render.offscreenMargin;
+    world.bullets = world.bullets.filter(b => b.life > 0 && b.x > gameState.camX - mr && b.x < gameState.camX + W + mr && b.y > -mr / 2 && b.y < H + mr / 2);
+  }
+
+  function updateEnemyBullets(dt) {
+    const mr = CONFIG.render.offscreenMargin;
+    for (const b of world.enemyBullets) {
+      b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
+      if (bulletHitPlatform(b)) { b.life = 0; continue; }
+      if (!player.dead && player.invuln <= 0 && aabb(b, player)) {
+        b.life = 0;
+        hitPlayer(false);
+        if (player.dead) return true;
+      }
+    }
+    world.enemyBullets = world.enemyBullets.filter(b => b.life > 0 && b.x > gameState.camX - mr && b.x < gameState.camX + W + mr && b.y > -mr / 2 && b.y < H + mr);
+    return false;
+  }
+
+  function updateContactDamage() {
+    if (player.invuln > 0 || player.dead) return false;
+    for (const e of world.enemies) {
+      if (e.dead) continue;
+      if (aabb(player, enemyHurtBox(e))) {
+        hitPlayer(false);
+        return player.dead;
+      }
+    }
+    return false;
+  }
+
+  function updatePickups() {
+    for (const p of world.pickups) {
+      if (p.taken) continue;
+      const pb = { x: p.x, y: p.y, w: CONFIG.pickup.w, h: CONFIG.pickup.h };
+      if (!aabb(player, pb)) continue;
+
+      p.taken = true;
+      gameState.stats.pickups++;
+      if (p.type === 'rapid') { player.weapon = 'rapid'; player.weaponTimer = CONFIG.weapons.duration; }
+      else if (p.type === 'spread') { player.weapon = 'spread'; player.weaponTimer = CONFIG.weapons.duration; }
+      else if (p.type === 'life') { player.life = Math.min(player.maxLife, player.life + 1); }
+      audio.play('pickup');
+      gameState.score += CONFIG.pickup.score;
+      for (let i = 0; i < CONFIG.particles.pickup; i++) {
+        world.particles.push({ x: p.x + 10, y: p.y + 10, vx: rand(-100, 100), vy: rand(-120, 20), life: 0.5, c: p.type === 'life' ? CONFIG.colors.particlePickupLife : CONFIG.colors.particlePickupWeapon });
+      }
+    }
+  }
+
+  function updateParticles(dt) {
+    for (const pa of world.particles) {
+      pa.x += pa.vx * dt;
+      pa.y += pa.vy * dt;
+      pa.vy += CONFIG.particles.gravity * dt;
+      pa.life -= dt;
+    }
+    world.particles = world.particles.filter(p => p.life > 0);
   }
 
   // ---------- 更新 ----------
@@ -1238,165 +1285,12 @@
     }
     player.anim += dt;
 
-    // 敌人
-    for (const e of world.enemies) {
-      if (e.dead) continue;
-      e.anim += dt;
-      e.fireCD -= dt;
-      // 朝向玩家
-      e.dir = enemyDirToPlayer(e);
-      const movement = enemyMovement(e);
-      // 巡逻 / 飞行
-      if (movement === 'patrol') {
-        e.x += e.vx * dt;
-        if (e.x < e.patrolMin) { e.x = e.patrolMin; e.vx = Math.abs(e.vx); }
-        if (e.x > e.patrolMax) { e.x = e.patrolMax; e.vx = -Math.abs(e.vx); }
-      }
-      // 直升机/飞艇Boss/空降兵/天空骑士运动：绕中心盘旋或漂浮
-      if (movement === 'orbit') {
-        e.phase += dt * CONFIG.enemy.helicopterPhaseSpeed;
-        e.x = e.centerX + Math.cos(e.phase) * e.radius;
-        e.y = e.centerY + Math.sin(e.phase * CONFIG.enemy.helicopterYPhaseMult) * CONFIG.enemy.helicopterAmplitude;
-        e.dir = enemyDirToPlayer(e);
-      }
-      // 炮台/机甲/坦克Boss/地面特色怪物固定在地面上
-      if (movement === 'groundLocked' || enemyConfig(e.type).groundLocked) e.y = GROUND_Y - e.h;
-      // 射击：仅在玩家在镜头内 & 一定距离
-      const fireInfo = enemyPlayerFireInfo(e);
-      if (e.fireCD <= 0 && fireInfo.active) {
-        const eCfg = enemyConfig(e.type);
-        let nextCD = rand(...eCfg.fireCD) * enemyFireMult();
-        const attack = enemyAttack(e);
-        if (attack === 'flameSpread') {
-          // 火焰喷射：发射3发散射火焰弹
-          const baseAng = fireInfo.baseAng;
-          for (let i = -1; i <= 1; i++) {
-            const ang = baseAng + i * 0.18;
-            const sp = CONFIG.enemy.bulletSpeed.default * 0.7;
-            const ebb = CONFIG.render.bullet.enemy;
-            world.enemyBullets.push({
-              x: e.x + e.w / 2, y: e.y + e.h * ebb.spawnY, w: ebb.w, h: ebb.h,
-              vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life: CONFIG.timing.enemyBulletLife * 0.7
-            });
-          }
-          audio.play('enemyShoot');
-          e.fireCD = nextCD;
-        } else if (attack === 'boss5Phase') {
-          // 坦克王多阶段攻击：血量越低越凶猛
-          const hpRatio = e.hp / e.maxhp;
-          const baseAng = fireInfo.baseAng;
-          const muzzleY = e.y + e.h * 0.35;
-          const fastSp = CONFIG.enemy.bulletSpeed.default * 1.1;
-          if (hpRatio > 0.6) {
-            // 阶段1：3发散射
-            for (let i = -1; i <= 1; i++) enemyShoot(e, { angle: baseAng + i * 0.15, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
-          } else if (hpRatio > 0.3) {
-            // 阶段2：5发散射 + 1发追踪
-            for (let i = -2; i <= 2; i++) enemyShoot(e, { angle: baseAng + i * 0.12, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
-            enemyShoot(e, { angle: baseAng, speed: CONFIG.enemy.bulletSpeed.default * 0.85, spawnY: muzzleY - e.y, silent: true });
-          } else {
-            // 阶段3：扇形7发 + 上下两路齐射
-            for (let i = -3; i <= 3; i++) enemyShoot(e, { angle: baseAng + i * 0.12, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
-            enemyShoot(e, { angle: baseAng - 0.35, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
-            enemyShoot(e, { angle: baseAng + 0.35, speed: fastSp, spawnY: muzzleY - e.y, silent: true });
-            nextCD *= 0.75;
-          }
-          audio.play('enemyShoot');
-          e.fireCD = nextCD;
-        } else {
-          enemyShoot(e);
-          e.fireCD = nextCD;
-        }
-      }
-    }
-
-    // 玩家子弹
-    const enemyGrid = buildEnemySpatialGrid(world.enemies);
-    for (const b of world.bullets) {
-      b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
-      if (bulletHitPlatform(b)) { b.life = 0; continue; }
-      // 命中敌人（仅检测相邻空间网格）
-      for (const e of getEnemiesNear(enemyGrid, b.x)) {
-        if (e.dead) continue;
-        if (aabb(b, enemyHurtBox(e))) {
-          b.life = 0;
-          gameState.stats.hits++;
-          e.hp -= 1;
-          audio.play('hit');
-          const hit = CONFIG.particles.hit;
-          for (let i = 0; i < hit.count; i++) world.particles.push({ x: b.x, y: b.y, vx: rand(hit.vx[0], hit.vx[1]), vy: rand(hit.vy[0], hit.vy[1]), life: hit.life, c: CONFIG.colors.particleHit });
-          if (e.hp <= 0) {
-            e.dead = true;
-            gameState.stats.kills++;
-            gameState.score += enemyScore(e);
-            if (isBossEnemy(e)) {
-              gameState.stats.bosses++;
-              // Boss 被击败
-              if (nextStageAfter(gameState.stage) !== gameState.stage) {
-                // 进入下一关
-                gameState.score += CONFIG.enemy.score.stageClear;
-                gameState.stageTimeout = setTimeout(() => startNextStage(), CONFIG.enemy.bossDeathDelay);
-              } else {
-                // 最终关通关
-                gameState.win = true;
-                endGame(true);
-              }
-            }
-            // 爆炸
-            audio.play('explosion');
-            const boom = CONFIG.particles.boom;
-            const boomCount = enemyBoomCount(e);
-            for (let i = 0; i < boomCount; i++) {
-              world.particles.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: rand(boom.vx[0], boom.vx[1]), vy: rand(boom.vy[0], boom.vy[1]), life: rand(boom.life[0], boom.life[1]), c: i % 2 ? CONFIG.colors.particleBoomA : CONFIG.colors.particleBoomB });
-            }
-            gameState.shake = enemyShake(e);
-          } else { gameState.shake = CONFIG.shake.enemyHit; }
-          break; // 一颗子弹只命中一个敌人
-        }
-      }
-    }
-    const mr = CONFIG.render.offscreenMargin;
-    world.bullets = world.bullets.filter(b => b.life > 0 && b.x > gameState.camX - mr && b.x < gameState.camX + W + mr && b.y > -mr / 2 && b.y < H + mr / 2);
-
-    // 敌人子弹
-    for (const b of world.enemyBullets) {
-      b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
-      if (bulletHitPlatform(b)) { b.life = 0; continue; }
-      if (!player.dead && player.invuln <= 0 && aabb(b, player)) {
-        b.life = 0;
-        hitPlayer(false);
-        if (player.dead) return;
-      }
-    }
-    world.enemyBullets = world.enemyBullets.filter(b => b.life > 0 && b.x > gameState.camX - mr && b.x < gameState.camX + W + mr && b.y > -mr / 2 && b.y < H + mr);
-
-    // 敌人接触伤害
-    if (player.invuln <= 0 && !player.dead) {
-      for (const e of world.enemies) {
-        if (e.dead) continue;
-        if (aabb(player, enemyHurtBox(e))) { hitPlayer(false); if (player.dead) return; break; }
-      }
-    }
-
-    // 拾取物
-    for (const p of world.pickups) {
-      if (p.taken) continue;
-      const pb = { x: p.x, y: p.y, w: CONFIG.pickup.w, h: CONFIG.pickup.h };
-      if (aabb(player, pb)) {
-        p.taken = true;
-        gameState.stats.pickups++;
-        if (p.type === 'rapid') { player.weapon = 'rapid'; player.weaponTimer = CONFIG.weapons.duration; }
-        else if (p.type === 'spread') { player.weapon = 'spread'; player.weaponTimer = CONFIG.weapons.duration; }
-        else if (p.type === 'life') { player.life = Math.min(player.maxLife, player.life + 1); }
-        audio.play('pickup');
-        gameState.score += CONFIG.pickup.score;
-        for (let i = 0; i < CONFIG.particles.pickup; i++) world.particles.push({ x: p.x + 10, y: p.y + 10, vx: rand(-100, 100), vy: rand(-120, 20), life: 0.5, c: p.type === 'life' ? CONFIG.colors.particlePickupLife : CONFIG.colors.particlePickupWeapon });
-      }
-    }
-
-    // 粒子
-    for (const pa of world.particles) { pa.x += pa.vx * dt; pa.y += pa.vy * dt; pa.vy += CONFIG.particles.gravity * dt; pa.life -= dt; }
-    world.particles = world.particles.filter(p => p.life > 0);
+    updateEnemyBehavior(dt);
+    updatePlayerBullets(dt);
+    if (updateEnemyBullets(dt)) return;
+    if (updateContactDamage()) return;
+    updatePickups();
+    updateParticles(dt);
 
     gameState.shake = Math.max(0, gameState.shake - dt * CONFIG.shake.decay);
     updateHUD();
@@ -1624,9 +1518,8 @@
     } else if (e.type === 'boss3' || e.type === 'boss4' || e.type === 'boss5') {
       const bs = CONFIG.render.imageScale[e.type];
       renderW = e.w * bs.w; renderH = e.h * bs.h;
-    } else if (['mousetank','paratrooper','rat','skyknight','flameguard'].includes(e.type)) {
-      const assetMap = { mousetank: 'enemy1', paratrooper: 'enemy2', rat: 'enemy3', skyknight: 'enemy4', flameguard: 'enemy5' };
-      const es = CONFIG.render.imageScale[assetMap[e.type]];
+    } else if (ELITE_ENEMY_ASSETS[e.type]) {
+      const es = CONFIG.render.imageScale[ELITE_ENEMY_ASSETS[e.type]];
       renderW = e.w * es.w; renderH = e.h * es.h;
     } else if ((e.type === 'stand' || e.type === 'patrol' || e.type === 'sniper') && imageReady(assets.infantry)) {
       const es = CONFIG.render.imageScale[e.type === 'sniper' ? 'sniper' : 'infantry'];
@@ -1728,16 +1621,28 @@
       ctx.fillRect(Hb.x, Hb.y, Hb.w, Hb.h);
       ctx.fillStyle = CONFIG.colors.enemyBloodFill;
       ctx.fillRect(Hb.x, Hb.y, Hb.w * (e.hp / e.maxhp), Hb.h);
-    } else if (e.type === 'mousetank' || e.type === 'paratrooper' || e.type === 'rat' || e.type === 'skyknight' || e.type === 'flameguard') {
+    } else if (ELITE_ENEMY_ASSETS[e.type]) {
       const key = e.type;
-      const assetMap = { mousetank: 'enemy1', paratrooper: 'enemy2', rat: 'enemy3', skyknight: 'enemy4', flameguard: 'enemy5' };
-      const assetKey = assetMap[key];
+      const assetKey = ELITE_ENEMY_ASSETS[key];
       const es = CONFIG.render.imageScale[assetKey];
       const imgW = e.w * es.w;
       const imgH = e.h * es.h;
-      if (imageReady(assets[assetKey])) {
+      const walk = CONFIG.render.spriteAnim[assetKey];
+      const walkAsset = walk && assets[walk.asset];
+      if (walk && imageReady(walkAsset)) {
+        const frameW = walkAsset.width / walk.frames;
+        const frameH = walkAsset.height;
+        const frame = Math.floor(e.anim * walk.fps) % walk.frames;
         ctx.save();
-        ctx.translate(0, e.h / 2 - imgH / 2);
+        const bottomAligned = enemyMovement(e) === 'groundLocked' || enemyConfig(e.type).groundLocked;
+        ctx.translate(0, bottomAligned ? e.h - imgH : e.h / 2 - imgH / 2);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(walkAsset, frame * frameW, 0, frameW, frameH, -imgW / 2, 0, imgW, imgH);
+        ctx.restore();
+      } else if (imageReady(assets[assetKey])) {
+        ctx.save();
+        const bottomAligned = enemyMovement(e) === 'groundLocked' || enemyConfig(e.type).groundLocked;
+        ctx.translate(0, bottomAligned ? e.h - imgH : e.h / 2 - imgH / 2);
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(assets[assetKey], -imgW / 2, 0, imgW, imgH);
         ctx.restore();
@@ -1760,10 +1665,19 @@
         const es = CONFIG.render.imageScale[scaleKey];
         const imgW = e.w * es.w;
         const imgH = e.h * es.h;
+        const walk = e.type === 'patrol' ? CONFIG.render.spriteAnim.infantry : null;
+        const walkAsset = walk && assets[walk.asset];
         ctx.save();
         ctx.translate(0, e.h - imgH + bob * 0.45);
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(assets.infantry, -imgW / 2, 0, imgW, imgH);
+        if (walk && imageReady(walkAsset)) {
+          const frameW = walkAsset.width / walk.frames;
+          const frameH = walkAsset.height;
+          const frame = Math.floor(e.anim * walk.fps) % walk.frames;
+          ctx.drawImage(walkAsset, frame * frameW, 0, frameW, frameH, -imgW / 2, 0, imgW, imgH);
+        } else {
+          ctx.drawImage(assets.infantry, -imgW / 2, 0, imgW, imgH);
+        }
         if (e.type === 'sniper') {
           ctx.fillStyle = 'rgba(122,215,255,0.9)';
           ctx.fillRect(imgW * 0.16, imgH * 0.42, 7, 2);
@@ -2241,11 +2155,7 @@
     player.weapon = 'normal'; player.weaponTimer = 0;
     resetPlayer(true);
     // 清空输入状态，防止用空格/回车点击按钮时触发跳跃/射击
-    input.keys = {};
-    input.mouse.down = false;
-    input.touch.left = input.touch.right = input.touch.up = input.touch.down = input.touch.jump = input.touch.fire = false;
-    input.jumpHeld = false;
-    input.jumpBuffer = 0;
+    resetInput();
     gameState.gameOver = false; gameState.win = false;
     if (menuCard) menuCard.hidden = false;
     if (endCard) endCard.hidden = true;
